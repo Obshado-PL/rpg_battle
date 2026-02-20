@@ -1,0 +1,134 @@
+[
+  {
+    "id": "warrior_slash",
+    "name": "Slash",
+    "description": "A powerful sword strike.",
+    "type": "physical",
+    "targetType": "singleEnemy",
+    "mpCost": 5,
+    "power": 12,
+    "animationKey": "slash",
+    "accuracy": 0.95
+  },
+  {
+    "id": "warrior_power_strike",
+    "name": "Power Strike",
+    "description": "A devastating blow dealing massive damage.",
+    "type": "physical",
+    "targetType": "singleEnemy",
+    "mpCost": 12,
+    "power": 22,
+    "animationKey": "power_slash",
+    "accuracy": 0.85
+  },
+  {
+    "id": "mage_fireball",
+    "name": "Fireball",
+    "description": "Hurls a ball of fire at one enemy.",
+    "type": "magical",
+    "targetType": "singleEnemy",
+    "mpCost": 8,
+    "power": 18,
+    "animationKey": "fire",
+    "accuracy": 1.0
+  },
+  {
+    "id": "mage_ice_storm",
+    "name": "Ice Storm",
+    "description": "A blizzard that strikes all enemies.",
+    "type": "magical",
+    "targetType": "allEnemies",
+    "mpCost": 20,
+    "power": 14,
+    "animationKey": "ice",
+    "accuracy": 1.0
+  },
+  {
+    "id": "healer_heal",
+    "name": "Heal",
+    "description": "Restores HP to one ally.",
+    "type": "healing",
+    "targetType": "singleAlly",
+    "mpCost": 6,
+    "power": 15,
+    "animationKey": "heal",
+    "accuracy": 1.0
+  },
+  {
+    "id": "healer_revive",
+    "name": "Revive",
+    "description": "Revives a fallen ally with partial HP.",
+    "type": "healing",
+    "targetType": "singleAlly",
+    "mpCost": 18,
+    "power": 8,
+    "animationKey": "revive",
+    "accuracy": 1.0
+  },
+  {
+    "id": "rogue_backstab",
+    "name": "Backstab",
+    "description": "A sneaky strike with high critical chance.",
+    "type": "physical",
+    "targetType": "singleEnemy",
+    "mpCost": 7,
+    "power": 16,
+    "animationKey": "backstab",
+    "accuracy": 0.9
+  },
+  {
+    "id": "rogue_poison_dart",
+    "name": "Poison Dart",
+    "description": "Throws a poisoned dart at one enemy.",
+    "type": "physical",
+    "targetType": "singleEnemy",
+    "mpCost": 10,
+    "power": 10,
+    "animationKey": "dart",
+    "accuracy": 0.95
+  },
+  {
+    "id": "enemy_bite",
+    "name": "Bite",
+    "description": "A vicious bite attack.",
+    "type": "physical",
+    "targetType": "singleEnemy",
+    "mpCost": 0,
+    "power": 10,
+    "animationKey": "slash",
+    "accuracy": 0.9
+  },
+  {
+    "id": "enemy_fire_breath",
+    "name": "Fire Breath",
+    "description": "Breathes fire on all heroes.",
+    "type": "magical",
+    "targetType": "allEnemies",
+    "mpCost": 0,
+    "power": 16,
+    "animationKey": "fire",
+    "accuracy": 1.0
+  },
+  {
+    "id": "enemy_dark_slash",
+    "name": "Dark Slash",
+    "description": "A slash imbued with dark energy.",
+    "type": "physical",
+    "targetType": "singleEnemy",
+    "mpCost": 0,
+    "power": 14,
+    "animationKey": "slash",
+    "accuracy": 0.95
+  },
+  {
+    "id": "enemy_tail_sweep",
+    "name": "Tail Sweep",
+    "description": "Sweeps all heroes with its massive tail.",
+    "type": "physical",
+    "targetType": "allEnemies",
+    "mpCost": 0,
+    "power": 20,
+    "animationKey": "slash",
+    "accuracy": 0.9
+  }
+]

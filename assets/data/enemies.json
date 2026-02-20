@@ -1,0 +1,128 @@
+[
+  {
+    "id": "slime",
+    "name": "Slime",
+    "stats": {
+      "maxHp": 40,
+      "maxMp": 0,
+      "attack": 8,
+      "defense": 4,
+      "magicAttack": 3,
+      "magicDefense": 4,
+      "speed": 5
+    },
+    "behavior": "random",
+    "skillIds": [],
+    "xpReward": 15,
+    "goldReward": 8,
+    "spriteColor": "0xFF4CAF50"
+  },
+  {
+    "id": "goblin",
+    "name": "Goblin",
+    "stats": {
+      "maxHp": 55,
+      "maxMp": 0,
+      "attack": 12,
+      "defense": 7,
+      "magicAttack": 4,
+      "magicDefense": 5,
+      "speed": 12
+    },
+    "behavior": "aggressive",
+    "skillIds": ["enemy_bite"],
+    "xpReward": 25,
+    "goldReward": 15,
+    "spriteColor": "0xFF8BC34A"
+  },
+  {
+    "id": "skeleton",
+    "name": "Skeleton",
+    "stats": {
+      "maxHp": 70,
+      "maxMp": 0,
+      "attack": 14,
+      "defense": 10,
+      "magicAttack": 6,
+      "magicDefense": 8,
+      "speed": 8
+    },
+    "behavior": "defensive",
+    "skillIds": ["enemy_dark_slash"],
+    "xpReward": 35,
+    "goldReward": 20,
+    "spriteColor": "0xFFBDBDBD"
+  },
+  {
+    "id": "wolf",
+    "name": "Dire Wolf",
+    "stats": {
+      "maxHp": 60,
+      "maxMp": 0,
+      "attack": 16,
+      "defense": 6,
+      "magicAttack": 3,
+      "magicDefense": 5,
+      "speed": 18
+    },
+    "behavior": "aggressive",
+    "skillIds": ["enemy_bite"],
+    "xpReward": 30,
+    "goldReward": 12,
+    "spriteColor": "0xFF795548"
+  },
+  {
+    "id": "dark_mage",
+    "name": "Dark Mage",
+    "stats": {
+      "maxHp": 50,
+      "maxMp": 100,
+      "attack": 6,
+      "defense": 5,
+      "magicAttack": 18,
+      "magicDefense": 14,
+      "speed": 11
+    },
+    "behavior": "aggressive",
+    "skillIds": ["enemy_fire_breath"],
+    "xpReward": 45,
+    "goldReward": 30,
+    "spriteColor": "0xFF9C27B0"
+  },
+  {
+    "id": "orc",
+    "name": "Orc Warrior",
+    "stats": {
+      "maxHp": 100,
+      "maxMp": 0,
+      "attack": 20,
+      "defense": 14,
+      "magicAttack": 4,
+      "magicDefense": 8,
+      "speed": 7
+    },
+    "behavior": "aggressive",
+    "skillIds": ["enemy_dark_slash"],
+    "xpReward": 50,
+    "goldReward": 35,
+    "spriteColor": "0xFF4E342E"
+  },
+  {
+    "id": "dragon",
+    "name": "Ancient Dragon",
+    "stats": {
+      "maxHp": 300,
+      "maxMp": 200,
+      "attack": 28,
+      "defense": 20,
+      "magicAttack": 25,
+      "magicDefense": 18,
+      "speed": 14
+    },
+    "behavior": "boss",
+    "skillIds": ["enemy_fire_breath", "enemy_tail_sweep"],
+    "xpReward": 200,
+    "goldReward": 150,
+    "spriteColor": "0xFFC62828"
+  }
+]

@@ -1,0 +1,66 @@
+[
+  {
+    "id": "encounter_1",
+    "name": "Forest Clearing",
+    "enemyIds": ["slime", "slime", "slime"],
+    "difficulty": 1,
+    "backgroundGradientStart": "0xFF1B5E20",
+    "backgroundGradientEnd": "0xFF2E7D32"
+  },
+  {
+    "id": "encounter_2",
+    "name": "Goblin Ambush",
+    "enemyIds": ["goblin", "goblin"],
+    "difficulty": 2,
+    "backgroundGradientStart": "0xFF33691E",
+    "backgroundGradientEnd": "0xFF558B2F"
+  },
+  {
+    "id": "encounter_3",
+    "name": "Wolf Pack",
+    "enemyIds": ["wolf", "wolf", "wolf"],
+    "difficulty": 3,
+    "backgroundGradientStart": "0xFF3E2723",
+    "backgroundGradientEnd": "0xFF4E342E"
+  },
+  {
+    "id": "encounter_4",
+    "name": "Graveyard",
+    "enemyIds": ["skeleton", "skeleton", "skeleton"],
+    "difficulty": 4,
+    "backgroundGradientStart": "0xFF263238",
+    "backgroundGradientEnd": "0xFF37474F"
+  },
+  {
+    "id": "encounter_5",
+    "name": "Dark Tower",
+    "enemyIds": ["dark_mage", "skeleton"],
+    "difficulty": 5,
+    "backgroundGradientStart": "0xFF4A148C",
+    "backgroundGradientEnd": "0xFF6A1B9A"
+  },
+  {
+    "id": "encounter_6",
+    "name": "Orc Stronghold",
+    "enemyIds": ["orc", "orc", "goblin"],
+    "difficulty": 6,
+    "backgroundGradientStart": "0xFF3E2723",
+    "backgroundGradientEnd": "0xFF5D4037"
+  },
+  {
+    "id": "encounter_7",
+    "name": "Dark Sanctum",
+    "enemyIds": ["dark_mage", "dark_mage", "orc"],
+    "difficulty": 7,
+    "backgroundGradientStart": "0xFF1A237E",
+    "backgroundGradientEnd": "0xFF311B92"
+  },
+  {
+    "id": "encounter_8",
+    "name": "Dragon's Lair",
+    "enemyIds": ["dragon"],
+    "difficulty": 8,
+    "backgroundGradientStart": "0xFFB71C1C",
+    "backgroundGradientEnd": "0xFF880E4F"
+  }
+]

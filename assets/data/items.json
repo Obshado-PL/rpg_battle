@@ -1,0 +1,34 @@
+[
+  {
+    "id": "potion",
+    "name": "Potion",
+    "description": "Restores 50 HP to one ally.",
+    "effect": "restoreHp",
+    "power": 50,
+    "targetType": "singleAlly"
+  },
+  {
+    "id": "hi_potion",
+    "name": "Hi-Potion",
+    "description": "Restores 120 HP to one ally.",
+    "effect": "restoreHp",
+    "power": 120,
+    "targetType": "singleAlly"
+  },
+  {
+    "id": "ether",
+    "name": "Ether",
+    "description": "Restores 30 MP to one ally.",
+    "effect": "restoreMp",
+    "power": 30,
+    "targetType": "singleAlly"
+  },
+  {
+    "id": "phoenix_down",
+    "name": "Phoenix Down",
+    "description": "Revives a fallen ally with 25% HP.",
+    "effect": "revive",
+    "power": 25,
+    "targetType": "singleAlly"
+  }
+]
