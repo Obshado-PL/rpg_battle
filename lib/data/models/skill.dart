@@ -1,3 +1,5 @@
+import 'status_effect.dart';
+
 enum SkillType { physical, magical, healing }
 
 enum TargetType { singleEnemy, allEnemies, singleAlly, allAllies, self_ }
@@ -12,6 +14,10 @@ class Skill {
   final int power;
   final String animationKey;
   final double accuracy;
+  final StatusEffectType? appliesEffect;
+  final int effectDuration;
+  final int effectValue;
+  final double effectChance;
 
   const Skill({
     required this.id,
@@ -23,9 +29,14 @@ class Skill {
     required this.power,
     required this.animationKey,
     this.accuracy = 1.0,
+    this.appliesEffect,
+    this.effectDuration = 3,
+    this.effectValue = 0,
+    this.effectChance = 1.0,
   });
 
   factory Skill.fromJson(Map<String, dynamic> json) {
+    final effectStr = json['appliesEffect'] as String?;
     return Skill(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -40,6 +51,12 @@ class Skill {
       power: json['power'] as int,
       animationKey: json['animationKey'] as String,
       accuracy: (json['accuracy'] as num?)?.toDouble() ?? 1.0,
+      appliesEffect: effectStr != null
+          ? StatusEffectType.values.firstWhere((e) => e.name == effectStr)
+          : null,
+      effectDuration: json['effectDuration'] as int? ?? 3,
+      effectValue: json['effectValue'] as int? ?? 0,
+      effectChance: (json['effectChance'] as num?)?.toDouble() ?? 1.0,
     );
   }
 

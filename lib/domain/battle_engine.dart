@@ -6,9 +6,11 @@ import '../data/models/equipment.dart';
 import '../data/models/item.dart';
 import '../data/models/skill.dart';
 import '../data/models/stats.dart';
+import '../data/models/status_effect.dart';
 import 'damage_calculator.dart';
 import 'enemy_ai.dart';
 import 'equipment_system.dart';
+import 'status_effect_processor.dart';
 import 'turn_manager.dart';
 
 class BattleAnimationEvent {
@@ -50,6 +52,7 @@ class BattleEngine {
   final Map<String, Skill> _skills;
   final Map<String, Item> _items;
   final Map<String, Equipment> _equipment;
+  final StatusEffectProcessor _statusProcessor;
 
   BattleEngine({
     required TurnManager turnManager,
@@ -58,15 +61,38 @@ class BattleEngine {
     required Map<String, Skill> skills,
     required Map<String, Item> items,
     required Map<String, Equipment> equipment,
+    StatusEffectProcessor? statusProcessor,
   })  : _turnManager = turnManager,
         _damageCalculator = damageCalculator,
         _enemyAi = enemyAi,
         _skills = skills,
         _items = items,
-        _equipment = equipment;
+        _equipment = equipment,
+        _statusProcessor = statusProcessor ?? StatusEffectProcessor();
 
   Stats _effectiveStats(Character hero) {
-    return EquipmentSystem.computeEffectiveStats(hero, _equipment);
+    final base = EquipmentSystem.computeEffectiveStats(hero, _equipment);
+    if (hero.statusEffects.isEmpty) return base;
+    final atkMult = _statusProcessor.getAttackMultiplier(hero.statusEffects);
+    final defMult = _statusProcessor.getDefenseMultiplier(hero.statusEffects);
+    return base.copyWith(
+      attack: (base.attack * atkMult).round().clamp(1, 9999),
+      magicAttack: (base.magicAttack * atkMult).round().clamp(1, 9999),
+      defense: (base.defense * defMult).round().clamp(1, 9999),
+      magicDefense: (base.magicDefense * defMult).round().clamp(1, 9999),
+    );
+  }
+
+  Stats _effectiveEnemyStats(Enemy enemy) {
+    if (enemy.statusEffects.isEmpty) return enemy.stats;
+    final atkMult = _statusProcessor.getAttackMultiplier(enemy.statusEffects);
+    final defMult = _statusProcessor.getDefenseMultiplier(enemy.statusEffects);
+    return enemy.stats.copyWith(
+      attack: (enemy.stats.attack * atkMult).round().clamp(1, 9999),
+      magicAttack: (enemy.stats.magicAttack * atkMult).round().clamp(1, 9999),
+      defense: (enemy.stats.defense * defMult).round().clamp(1, 9999),
+      magicDefense: (enemy.stats.magicDefense * defMult).round().clamp(1, 9999),
+    );
   }
 
   BattleState initBattle({
@@ -87,21 +113,30 @@ class BattleEngine {
   }
 
   BattleState startRound(BattleState state) {
+    // Tick down status effect durations at round start (after round 1)
+    final tickMessages = <String>[];
+    var tickedState = state;
+    if (state.roundNumber > 1) {
+      tickedState =
+          _statusProcessor.tickDownDurations(state, tickMessages);
+    }
+
     final turnOrder = _turnManager.calculateTurnOrder(
-      party: state.party,
-      enemies: state.enemies,
+      party: tickedState.party,
+      enemies: tickedState.enemies,
     );
 
-    if (turnOrder.isEmpty) return state;
+    if (turnOrder.isEmpty) return tickedState;
 
     final firstActorId = turnOrder.first;
-    final isHero = state.party.any((h) => h.id == firstActorId);
+    final isHero = tickedState.party.any((h) => h.id == firstActorId);
 
-    return state.copyWith(
+    return tickedState.copyWith(
       turnOrder: turnOrder,
       currentTurnIndex: 0,
       phase: isHero ? BattlePhase.playerInput : BattlePhase.enemyTurn,
       activeHeroId: isHero ? firstActorId : null,
+      battleLog: [...tickedState.battleLog, ...tickMessages],
     );
   }
 
@@ -112,7 +147,7 @@ class BattleEngine {
       // Round complete — reset defend flags and start new round
       final resetParty =
           state.party.map((h) => h.copyWith(isDefending: false)).toList();
-      final resetEnemies = state.enemies; // enemies defend flag handled inline
+      final resetEnemies = state.enemies;
       return startRound(state.copyWith(
         party: resetParty,
         enemies: resetEnemies,
@@ -128,10 +163,49 @@ class BattleEngine {
       return advanceTurn(state.copyWith(currentTurnIndex: nextIndex));
     }
 
-    final isHero = state.party.any((h) => h.id == nextActorId);
+    // Process status effects at turn start (DoT, stun)
+    var currentState = state.copyWith(currentTurnIndex: nextIndex);
+    final tickResult =
+        _statusProcessor.processTurnStart(currentState, nextActorId);
+    currentState = tickResult.state;
 
-    return state.copyWith(
-      currentTurnIndex: nextIndex,
+    if (tickResult.messages.isNotEmpty) {
+      currentState = currentState.copyWith(
+        battleLog: [...currentState.battleLog, ...tickResult.messages],
+      );
+    }
+
+    // Check if DoT killed the actor
+    if (!_isActorAlive(currentState, nextActorId)) {
+      // Check victory/defeat after DoT kill
+      if (currentState.enemies.every((e) => !e.isAlive)) {
+        final totalXp =
+            currentState.enemies.fold<int>(0, (sum, e) => sum + e.xpReward);
+        final totalGold =
+            currentState.enemies.fold<int>(0, (sum, e) => sum + e.goldReward);
+        return currentState.copyWith(
+          phase: BattlePhase.victory,
+          result: BattleResult(totalXp: totalXp, totalGold: totalGold),
+          battleLog: [...currentState.battleLog, 'Victory!'],
+        );
+      }
+      if (currentState.party.every((h) => !h.isAlive)) {
+        return currentState.copyWith(
+          phase: BattlePhase.defeat,
+          battleLog: [...currentState.battleLog, 'Defeat...'],
+        );
+      }
+      return advanceTurn(currentState);
+    }
+
+    // If stunned, skip this actor's turn
+    if (tickResult.isStunned) {
+      return advanceTurn(currentState);
+    }
+
+    final isHero = currentState.party.any((h) => h.id == nextActorId);
+
+    return currentState.copyWith(
       phase: isHero ? BattlePhase.playerInput : BattlePhase.enemyTurn,
       activeHeroId: isHero ? nextActorId : null,
     );
@@ -233,7 +307,7 @@ class BattleEngine {
 
       final dmg = _damageCalculator.calculateBasicAttack(
         attackStat: _effectiveStats(hero).attack,
-        defenseStat: enemy.stats.defense,
+        defenseStat: _effectiveEnemyStats(enemy).defense,
         isDefending: false,
       );
 
@@ -280,7 +354,7 @@ class BattleEngine {
       final hero = state.party.firstWhere((h) => h.id == targetId);
 
       final dmg = _damageCalculator.calculateBasicAttack(
-        attackStat: enemy.stats.attack,
+        attackStat: _effectiveEnemyStats(enemy).attack,
         defenseStat: _effectiveStats(hero).defense,
         isDefending: hero.isDefending,
       );
@@ -427,14 +501,30 @@ class BattleEngine {
           ));
         }
       }
-      return state.copyWith(party: updatedParty);
+      // Apply buff effects to all living allies
+      var resultState = state.copyWith(party: updatedParty);
+      if (skill.appliesEffect != null) {
+        for (final ally in resultState.party) {
+          if (!ally.isAlive) continue;
+          resultState = _tryApplyStatusEffect(
+            state: resultState,
+            skill: skill,
+            actorId: action.actorId,
+            targetId: ally.id,
+            targetIsHero: true,
+            messages: messages,
+          );
+        }
+      }
+      return resultState;
     }
 
     // Healing targets allies
     final target = state.party.firstWhere((h) => h.id == targetId);
 
     // Handle revive
-    if (skill.id == 'healer_revive' && !target.isAlive) {
+    if ((skill.id == 'healer_revive' || skill.id == 'healer_resurrection') &&
+        !target.isAlive) {
       final tStats = _effectiveStats(target);
       final reviveHp = (tStats.maxHp * 0.25).round().clamp(1, tStats.maxHp);
       final updatedParty = state.party.map((h) {
@@ -479,7 +569,19 @@ class BattleEngine {
       effectKey: skill.animationKey,
     ));
 
-    return state.copyWith(party: updatedParty);
+    var resultState = state.copyWith(party: updatedParty);
+    // Apply buff effects to the healed ally
+    if (skill.appliesEffect != null) {
+      resultState = _tryApplyStatusEffect(
+        state: resultState,
+        skill: skill,
+        actorId: action.actorId,
+        targetId: targetId,
+        targetIsHero: true,
+        messages: messages,
+      );
+    }
+    return resultState;
   }
 
   BattleState _applyAoeSkill(
@@ -508,17 +610,18 @@ class BattleEngine {
         final enemy = updatedEnemies[i];
         if (!enemy.isAlive) continue;
 
+        final enemyStats = _effectiveEnemyStats(enemy);
         DamageResult dmg;
         if (skill.type == SkillType.magical) {
           dmg = _damageCalculator.calculateMagicalDamage(
             magicAttackStat: heroStats.magicAttack,
-            magicDefenseStat: enemy.stats.magicDefense,
+            magicDefenseStat: enemyStats.magicDefense,
             skillPower: skill.power,
           );
         } else {
           dmg = _damageCalculator.calculatePhysicalDamage(
             attackStat: heroStats.attack,
-            defenseStat: enemy.stats.defense,
+            defenseStat: enemyStats.defense,
             skillPower: skill.power,
             accuracy: skill.accuracy,
           );
@@ -545,10 +648,26 @@ class BattleEngine {
         }
       }
 
-      return state.copyWith(enemies: updatedEnemies);
+      // Apply status effects to surviving enemies
+      var resultState = state.copyWith(enemies: updatedEnemies);
+      if (skill.appliesEffect != null) {
+        for (final enemy in resultState.enemies) {
+          if (!enemy.isAlive) continue;
+          resultState = _tryApplyStatusEffect(
+            state: resultState,
+            skill: skill,
+            actorId: action.actorId,
+            targetId: enemy.id,
+            targetIsHero: false,
+            messages: messages,
+          );
+        }
+      }
+      return resultState;
     } else {
       // Enemy AoE hits all heroes
       final enemy = state.enemies.firstWhere((e) => e.id == action.actorId);
+      final enemyStats = _effectiveEnemyStats(enemy);
       var updatedParty = List<Character>.from(state.party);
 
       for (var i = 0; i < updatedParty.length; i++) {
@@ -559,14 +678,14 @@ class BattleEngine {
         DamageResult dmg;
         if (skill.type == SkillType.magical) {
           dmg = _damageCalculator.calculateMagicalDamage(
-            magicAttackStat: enemy.stats.magicAttack,
+            magicAttackStat: enemyStats.magicAttack,
             magicDefenseStat: heroStats.magicDefense,
             skillPower: skill.power,
             isDefending: hero.isDefending,
           );
         } else {
           dmg = _damageCalculator.calculatePhysicalDamage(
-            attackStat: enemy.stats.attack,
+            attackStat: enemyStats.attack,
             defenseStat: heroStats.defense,
             skillPower: skill.power,
             accuracy: skill.accuracy,
@@ -595,7 +714,22 @@ class BattleEngine {
         }
       }
 
-      return state.copyWith(party: updatedParty);
+      // Apply status effects to surviving heroes
+      var resultState = state.copyWith(party: updatedParty);
+      if (skill.appliesEffect != null) {
+        for (final hero in resultState.party) {
+          if (!hero.isAlive) continue;
+          resultState = _tryApplyStatusEffect(
+            state: resultState,
+            skill: skill,
+            actorId: action.actorId,
+            targetId: hero.id,
+            targetIsHero: true,
+            messages: messages,
+          );
+        }
+      }
+      return resultState;
     }
   }
 
@@ -613,18 +747,19 @@ class BattleEngine {
       final hero = state.party.firstWhere((h) => h.id == action.actorId);
       final heroStats = _effectiveStats(hero);
       final enemy = state.enemies.firstWhere((e) => e.id == targetId);
+      final enemyStats = _effectiveEnemyStats(enemy);
 
       DamageResult dmg;
       if (skill.type == SkillType.magical) {
         dmg = _damageCalculator.calculateMagicalDamage(
           magicAttackStat: heroStats.magicAttack,
-          magicDefenseStat: enemy.stats.magicDefense,
+          magicDefenseStat: enemyStats.magicDefense,
           skillPower: skill.power,
         );
       } else {
         dmg = _damageCalculator.calculatePhysicalDamage(
           attackStat: heroStats.attack,
-          defenseStat: enemy.stats.defense,
+          defenseStat: enemyStats.defense,
           skillPower: skill.power,
           accuracy: skill.accuracy,
         );
@@ -664,24 +799,37 @@ class BattleEngine {
               BattleAnimationEvent(type: 'death', actorId: targetId));
         }
 
-        return state.copyWith(enemies: updatedEnemies);
+        var resultState = state.copyWith(enemies: updatedEnemies);
+        // Apply status effect if target is alive
+        if (newHp > 0) {
+          resultState = _tryApplyStatusEffect(
+            state: resultState,
+            skill: skill,
+            actorId: action.actorId,
+            targetId: targetId,
+            targetIsHero: false,
+            messages: messages,
+          );
+        }
+        return resultState;
       }
     } else {
       final enemy = state.enemies.firstWhere((e) => e.id == action.actorId);
+      final enemyStats = _effectiveEnemyStats(enemy);
       final hero = state.party.firstWhere((h) => h.id == targetId);
       final heroStats = _effectiveStats(hero);
 
       DamageResult dmg;
       if (skill.type == SkillType.magical) {
         dmg = _damageCalculator.calculateMagicalDamage(
-          magicAttackStat: enemy.stats.magicAttack,
+          magicAttackStat: enemyStats.magicAttack,
           magicDefenseStat: heroStats.magicDefense,
           skillPower: skill.power,
           isDefending: hero.isDefending,
         );
       } else {
         dmg = _damageCalculator.calculatePhysicalDamage(
-          attackStat: enemy.stats.attack,
+          attackStat: enemyStats.attack,
           defenseStat: heroStats.defense,
           skillPower: skill.power,
           accuracy: skill.accuracy,
@@ -721,7 +869,19 @@ class BattleEngine {
               BattleAnimationEvent(type: 'death', actorId: targetId));
         }
 
-        return state.copyWith(party: updatedParty);
+        var resultState = state.copyWith(party: updatedParty);
+        // Apply status effect if target is alive
+        if (newHp > 0) {
+          resultState = _tryApplyStatusEffect(
+            state: resultState,
+            skill: skill,
+            actorId: action.actorId,
+            targetId: targetId,
+            targetIsHero: true,
+            messages: messages,
+          );
+        }
+        return resultState;
       }
     }
 
@@ -887,6 +1047,51 @@ class BattleEngine {
         messages: ['Could not escape!'],
         animations: [],
       );
+    }
+  }
+
+  // --- Status effect application helper ---
+
+  /// Try to apply a skill's status effect to a target.
+  /// Returns updated party/enemies lists and messages.
+  BattleState _tryApplyStatusEffect({
+    required BattleState state,
+    required Skill skill,
+    required String actorId,
+    required String targetId,
+    required bool targetIsHero,
+    required List<String> messages,
+  }) {
+    if (skill.appliesEffect == null) return state;
+    if (!_statusProcessor.rollEffect(skill.effectChance)) return state;
+
+    final effect = StatusEffect(
+      type: skill.appliesEffect!,
+      duration: skill.effectDuration,
+      value: skill.effectValue,
+      sourceId: actorId,
+    );
+
+    if (targetIsHero) {
+      final idx = state.party.indexWhere((h) => h.id == targetId);
+      if (idx < 0) return state;
+      final hero = state.party[idx];
+      final newEffects =
+          _statusProcessor.applyEffect(hero.statusEffects, effect);
+      final updatedParty = List<Character>.from(state.party);
+      updatedParty[idx] = hero.copyWith(statusEffects: newEffects);
+      messages.add('${hero.name} is afflicted with ${effect.displayName}!');
+      return state.copyWith(party: updatedParty);
+    } else {
+      final idx = state.enemies.indexWhere((e) => e.id == targetId);
+      if (idx < 0) return state;
+      final enemy = state.enemies[idx];
+      final newEffects =
+          _statusProcessor.applyEffect(enemy.statusEffects, effect);
+      final updatedEnemies = List<Enemy>.from(state.enemies);
+      updatedEnemies[idx] = enemy.copyWith(statusEffects: newEffects);
+      messages.add('${enemy.name} is afflicted with ${effect.displayName}!');
+      return state.copyWith(enemies: updatedEnemies);
     }
   }
 

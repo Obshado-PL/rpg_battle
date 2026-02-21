@@ -3,12 +3,16 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import '../models/character.dart';
+import '../models/difficulty.dart';
 import '../models/encounter.dart';
 import '../models/enemy.dart';
 import '../models/equipment.dart';
 import '../models/item.dart';
+import '../models/loot_table.dart';
 import '../models/skill.dart';
+import '../models/skill_tree.dart';
 import '../models/stats.dart';
+import '../models/story_dialogue.dart';
 
 class GameData {
   late final Map<String, Skill> skills;
@@ -16,6 +20,9 @@ class GameData {
   late final Map<String, Item> items;
   late final List<Encounter> encounters;
   late final Map<String, Equipment> equipment;
+  late final Map<String, List<LootDrop>> lootTables;
+  late final List<SkillTree> skillTrees;
+  late final Map<String, EncounterStory> storyData;
   late final List<Character> defaultParty;
 
   Future<void> load() async {
@@ -24,6 +31,9 @@ class GameData {
     items = await _loadItems();
     encounters = await _loadEncounters();
     equipment = await _loadEquipment();
+    lootTables = await _loadLootTables();
+    skillTrees = await _loadSkillTrees();
+    storyData = await _loadStory();
     defaultParty = _createDefaultParty();
   }
 
@@ -79,9 +89,76 @@ class GameData {
     return map;
   }
 
+  Future<Map<String, List<LootDrop>>> _loadLootTables() async {
+    final jsonStr =
+        await rootBundle.loadString('assets/data/loot_tables.json');
+    final map = json.decode(jsonStr) as Map<String, dynamic>;
+    return map.map((key, value) {
+      final drops = (value as List)
+          .map((e) => LootDrop.fromJson(e as Map<String, dynamic>))
+          .toList();
+      return MapEntry(key, drops);
+    });
+  }
+
+  Future<List<SkillTree>> _loadSkillTrees() async {
+    final jsonStr =
+        await rootBundle.loadString('assets/data/skill_trees.json');
+    final list = json.decode(jsonStr) as List;
+    return list
+        .map((e) => SkillTree.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<Map<String, EncounterStory>> _loadStory() async {
+    final jsonStr = await rootBundle.loadString('assets/data/story.json');
+    final list = json.decode(jsonStr) as List;
+    final map = <String, EncounterStory>{};
+    for (final entry in list) {
+      final story =
+          EncounterStory.fromJson(entry as Map<String, dynamic>);
+      map[story.encounterId] = story;
+    }
+    return map;
+  }
+
+  /// Get combined loot table for all enemies in an encounter.
+  List<LootDrop> getLootTableForEncounter(Encounter encounter) {
+    final drops = <LootDrop>[];
+    for (final enemyId in encounter.enemyIds) {
+      final table = lootTables[enemyId];
+      if (table != null) drops.addAll(table);
+    }
+    return drops;
+  }
+
+  /// Scale an enemy template's stats by the given difficulty config.
+  Enemy _scaleEnemyForDifficulty(Enemy template, DifficultyConfig config) {
+    if (config.difficulty == Difficulty.normal) return template;
+    final s = config.enemyStatScale;
+    return template.copyWith(
+      stats: Stats(
+        maxHp: (template.stats.maxHp * s).round().clamp(1, 99999),
+        maxMp: (template.stats.maxMp * s).round().clamp(0, 99999),
+        attack: (template.stats.attack * s).round().clamp(1, 9999),
+        defense: (template.stats.defense * s).round().clamp(1, 9999),
+        magicAttack: (template.stats.magicAttack * s).round().clamp(1, 9999),
+        magicDefense: (template.stats.magicDefense * s).round().clamp(1, 9999),
+        speed: (template.stats.speed * s).round().clamp(1, 9999),
+      ),
+      currentHp: (template.stats.maxHp * s).round().clamp(1, 99999),
+      xpReward: (template.xpReward * config.rewardScale).round(),
+      goldReward: (template.goldReward * config.rewardScale).round(),
+    );
+  }
+
   /// Create enemy instances from template for a given encounter.
   /// Each enemy gets a unique runtime ID.
-  List<Enemy> createEnemiesForEncounter(Encounter encounter) {
+  List<Enemy> createEnemiesForEncounter(
+    Encounter encounter, {
+    Difficulty difficulty = Difficulty.normal,
+  }) {
+    final config = DifficultyConfig.get(difficulty);
     final enemies = <Enemy>[];
     final counts = <String, int>{};
 
@@ -98,10 +175,11 @@ class GameData {
           ? ' ${String.fromCharCode(64 + count)}' // A, B, C...
           : '';
 
-      enemies.add(template.copyWith(
+      final scaled = _scaleEnemyForDifficulty(template, config);
+      enemies.add(scaled.copyWith(
         id: '${enemyId}_$count',
         name: '${template.name}$suffix',
-        currentHp: template.stats.maxHp,
+        currentHp: scaled.stats.maxHp,
       ));
     }
 

@@ -50,6 +50,17 @@ void main() async {
             (ref) =>
                 OwnedEquipmentNotifier.fromSet(savedData.ownedEquipment),
           ),
+          difficultyProvider.overrideWith(
+            (ref) => savedData.difficulty,
+          ),
+          bestiaryProvider.overrideWith(
+            (ref) =>
+                BestiaryNotifier.fromMap(savedData.bestiaryDefeats),
+          ),
+          skillTreeChoicesProvider.overrideWith(
+            (ref) =>
+                SkillTreeChoicesNotifier.fromMap(savedData.skillTreeChoices),
+          ),
         ],
       ],
       child: const RpgBattleApp(),

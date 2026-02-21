@@ -5,11 +5,13 @@ import '../../data/datasources/save_manager.dart';
 import '../../data/models/battle_action.dart';
 import '../../data/models/battle_state.dart';
 import '../../data/models/character.dart';
+import '../../data/models/difficulty.dart';
 import '../../data/models/encounter.dart';
 import '../../data/models/equipment.dart';
 import '../../data/models/item.dart';
 import '../../data/models/save_data.dart';
 import '../../domain/battle_engine.dart' show BattleAnimationEvent, BattleEngine;
+import '../../domain/skill_tree_system.dart';
 import '../../domain/damage_calculator.dart';
 import '../../domain/enemy_ai.dart';
 import '../../domain/equipment_system.dart';
@@ -37,6 +39,58 @@ final saveManagerProvider = Provider<SaveManager>((ref) {
   throw UnimplementedError('Must be overridden with loaded SaveManager');
 });
 
+/// Difficulty setting.
+final difficultyProvider = StateProvider<Difficulty>((ref) => Difficulty.normal);
+
+/// Bestiary: enemy defeat counts.
+final bestiaryProvider =
+    StateNotifierProvider<BestiaryNotifier, Map<String, int>>((ref) {
+  return BestiaryNotifier();
+});
+
+class BestiaryNotifier extends StateNotifier<Map<String, int>> {
+  BestiaryNotifier() : super({});
+  BestiaryNotifier.fromMap(super.saved);
+
+  void recordDefeats(List<String> enemyTemplateIds) {
+    final updated = Map<String, int>.from(state);
+    for (final id in enemyTemplateIds) {
+      updated[id] = (updated[id] ?? 0) + 1;
+    }
+    state = updated;
+  }
+
+  void reset() => state = {};
+}
+
+/// Skill tree system provider.
+final skillTreeSystemProvider = Provider<SkillTreeSystem>((ref) {
+  final gameData = ref.watch(gameDataProvider);
+  return SkillTreeSystem(gameData.skillTrees);
+});
+
+/// Skill tree choices: key = "warrior_tier1", value = skill_id.
+final skillTreeChoicesProvider =
+    StateNotifierProvider<SkillTreeChoicesNotifier, Map<String, String>>(
+        (ref) => SkillTreeChoicesNotifier());
+
+class SkillTreeChoicesNotifier extends StateNotifier<Map<String, String>> {
+  SkillTreeChoicesNotifier() : super({});
+  SkillTreeChoicesNotifier.fromMap(super.saved);
+
+  void choose(String tierKey, String skillId) {
+    state = {...state, tierKey: skillId};
+  }
+
+  void resetClass(String heroClassName) {
+    state = Map.fromEntries(
+      state.entries.where((e) => !e.key.startsWith(heroClassName)),
+    );
+  }
+
+  void reset() => state = {};
+}
+
 /// Collect current state and save to disk.
 Future<void> collectAndSave(WidgetRef ref) async {
   final saveManager = ref.read(saveManagerProvider);
@@ -46,6 +100,9 @@ Future<void> collectAndSave(WidgetRef ref) async {
     gold: ref.read(goldProvider),
     clearedEncounters: ref.read(clearedEncountersProvider),
     ownedEquipment: ref.read(ownedEquipmentProvider),
+    difficulty: ref.read(difficultyProvider),
+    bestiaryDefeats: ref.read(bestiaryProvider),
+    skillTreeChoices: ref.read(skillTreeChoicesProvider),
     savedAt: DateTime.now().toIso8601String(),
   );
   await saveManager.save(data);
@@ -117,6 +174,13 @@ class PartyNotifier extends StateNotifier<List<Character>> {
 
   void applyBattleResult(List<Character> updatedParty) {
     state = updatedParty;
+  }
+
+  void updateHeroSkills(String heroId, List<String> skillIds) {
+    state = state.map((h) {
+      if (h.id != heroId) return h;
+      return h.copyWith(skillIds: skillIds);
+    }).toList();
   }
 
   void equip(String heroId, Equipment eq) {
@@ -225,8 +289,12 @@ class BattleNotifier extends StateNotifier<BattleState> {
     required Encounter encounter,
     required List<Character> party,
     required List<InventorySlot> inventory,
+    Difficulty difficulty = Difficulty.normal,
   }) {
-    final enemies = gameData.createEnemiesForEncounter(encounter);
+    final enemies = gameData.createEnemiesForEncounter(
+      encounter,
+      difficulty: difficulty,
+    );
     state = engine.initBattle(
       party: party,
       enemies: enemies,
@@ -287,16 +355,17 @@ class BattleNotifier extends StateNotifier<BattleState> {
     }
   }
 
-  /// Apply XP and level ups after victory.
+  /// Apply XP and level ups after victory. Strip status effects.
   List<Character> applyVictoryRewards(List<Character> party) {
     if (state.result == null) return party;
     final xpPerHero = state.result!.totalXp ~/ party.length.clamp(1, 99);
 
     return party.map((hero) {
-      if (hero.isAlive) {
-        return levelSystem.applyXp(hero, xpPerHero);
+      var h = hero.copyWith(statusEffects: []);
+      if (h.isAlive) {
+        h = levelSystem.applyXp(h, xpPerHero);
       }
-      return hero;
+      return h;
     }).toList();
   }
 }

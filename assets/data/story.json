@@ -1,0 +1,133 @@
+[
+  {
+    "encounterId": "encounter_1",
+    "preBattle": [
+      {"speaker": "Roland", "text": "Look, there are slimes blocking the path ahead."},
+      {"speaker": "Lyra", "text": "They seem weak. Good practice for our first fight together."},
+      {"speaker": "Sera", "text": "Stay close, everyone. I'll keep you healed."}
+    ]
+  },
+  {
+    "encounterId": "encounter_2",
+    "preBattle": [
+      {"speaker": "Kael", "text": "Hold up. I can see goblins hiding in the bushes."},
+      {"speaker": "Roland", "text": "An ambush? Then we'll meet them head-on!"},
+      {"speaker": "Kael", "text": "Or we could be smart about it. Just saying."}
+    ]
+  },
+  {
+    "encounterId": "encounter_3",
+    "preBattle": [
+      {"speaker": "Sera", "text": "I hear howling. There's a wolf pack nearby."},
+      {"speaker": "Roland", "text": "Dire wolves. They hunt in packs. Watch each other's backs."},
+      {"speaker": "Lyra", "text": "They're fast, but I can slow them down with my ice magic."}
+    ]
+  },
+  {
+    "encounterId": "encounter_4",
+    "preBattle": [
+      {"speaker": "Lyra", "text": "A graveyard... I can feel dark magic in the air."},
+      {"speaker": "Sera", "text": "The dead are stirring. Someone has disturbed their rest."},
+      {"speaker": "Roland", "text": "Then we'll put them back to rest. Stay sharp!"}
+    ]
+  },
+  {
+    "encounterId": "encounter_5",
+    "preBattle": [
+      {"speaker": "Kael", "text": "This tower reeks of dark sorcery."},
+      {"speaker": "Lyra", "text": "A dark mage dwells here. I can feel their power."},
+      {"speaker": "Roland", "text": "Magic or not, they'll fall to my blade. Let's go!"},
+      {"speaker": "Sera", "text": "Be careful. Their spells could be dangerous."}
+    ]
+  },
+  {
+    "encounterId": "encounter_6",
+    "preBattle": [
+      {"speaker": "Roland", "text": "An orc stronghold. These warriors won't go down easy."},
+      {"speaker": "Kael", "text": "I count two orcs and a goblin scout. We're outnumbered."},
+      {"speaker": "Lyra", "text": "Numbers don't matter when you have fire on your side."}
+    ]
+  },
+  {
+    "encounterId": "encounter_7",
+    "preBattle": [
+      {"speaker": "Sera", "text": "This place... it's consecrated to darkness."},
+      {"speaker": "Lyra", "text": "Two dark mages and an orc guard. This won't be easy."},
+      {"speaker": "Roland", "text": "We've come too far to turn back. Forward!"}
+    ]
+  },
+  {
+    "encounterId": "encounter_8",
+    "preBattle": [
+      {"speaker": "Kael", "text": "That's... that's an ancient dragon."},
+      {"speaker": "Lyra", "text": "Its power is immense. We must be strategic."},
+      {"speaker": "Sera", "text": "I'll do everything I can to keep everyone alive."},
+      {"speaker": "Roland", "text": "This is what we've been training for. Let's slay a dragon!"}
+    ]
+  },
+  {
+    "encounterId": "encounter_9",
+    "preBattle": [
+      {"speaker": "Kael", "text": "A bandit camp. These rogues prey on travelers."},
+      {"speaker": "Roland", "text": "Time to clean up these roads."},
+      {"speaker": "Kael", "text": "I almost feel bad fighting my own kind. Almost."}
+    ]
+  },
+  {
+    "encounterId": "encounter_10",
+    "preBattle": [
+      {"speaker": "Sera", "text": "I sense restless spirits here. And something darker."},
+      {"speaker": "Lyra", "text": "Phantoms and skeletons. The undead are stronger in these ruins."},
+      {"speaker": "Roland", "text": "Steel may not work well on ghosts. Lyra, we need your magic."}
+    ]
+  },
+  {
+    "encounterId": "encounter_11",
+    "preBattle": [
+      {"speaker": "Lyra", "text": "Stone golems. They're incredibly tough."},
+      {"speaker": "Roland", "text": "My sword barely scratches them. We need to find their weakness."},
+      {"speaker": "Lyra", "text": "Magic can penetrate stone. Leave it to me."}
+    ]
+  },
+  {
+    "encounterId": "encounter_12",
+    "preBattle": [
+      {"speaker": "Kael", "text": "It's freezing in here. I can barely feel my fingers."},
+      {"speaker": "Lyra", "text": "Ice elementals and a phantom. The cold empowers them."},
+      {"speaker": "Sera", "text": "Stay warm, everyone. I'll keep healing through the frost."}
+    ]
+  },
+  {
+    "encounterId": "encounter_13",
+    "preBattle": [
+      {"speaker": "Sera", "text": "A necromancer... the source of all this undeath."},
+      {"speaker": "Lyra", "text": "They command the dead. We must defeat them to end this."},
+      {"speaker": "Roland", "text": "If we stop the necromancer, the undead will fall."},
+      {"speaker": "Kael", "text": "Then let's make this quick."}
+    ]
+  },
+  {
+    "encounterId": "encounter_14",
+    "preBattle": [
+      {"speaker": "Roland", "text": "This is it. They've gathered their strongest warriors."},
+      {"speaker": "Kael", "text": "An orc, a bandit, a dark mage, and a golem. Lovely."},
+      {"speaker": "Lyra", "text": "We fight as one. Together, we can't be stopped."},
+      {"speaker": "Sera", "text": "I believe in all of you. Let's do this."}
+    ]
+  },
+  {
+    "encounterId": "encounter_15",
+    "preBattle": [
+      {"speaker": "Roland", "text": "The final battle. A necromancer and a dragon stand before us."},
+      {"speaker": "Lyra", "text": "Everything we've fought for comes down to this moment."},
+      {"speaker": "Kael", "text": "No turning back now. Let's finish this."},
+      {"speaker": "Sera", "text": "Together, we are unstoppable. For the world!"}
+    ],
+    "postBattle": [
+      {"speaker": "Roland", "text": "We did it... We actually did it!"},
+      {"speaker": "Lyra", "text": "The darkness is vanquished. The world is safe once more."},
+      {"speaker": "Sera", "text": "I'm so proud of all of you."},
+      {"speaker": "Kael", "text": "Not bad for a bunch of adventurers. Not bad at all."}
+    ]
+  }
+]

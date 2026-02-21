@@ -5,7 +5,9 @@
     "enemyIds": ["slime", "slime", "slime"],
     "difficulty": 1,
     "backgroundGradientStart": "0xFF1B5E20",
-    "backgroundGradientEnd": "0xFF2E7D32"
+    "backgroundGradientEnd": "0xFF2E7D32",
+    "mapX": 0.5,
+    "mapY": 0.92
   },
   {
     "id": "encounter_2",
@@ -13,7 +15,9 @@
     "enemyIds": ["goblin", "goblin"],
     "difficulty": 2,
     "backgroundGradientStart": "0xFF33691E",
-    "backgroundGradientEnd": "0xFF558B2F"
+    "backgroundGradientEnd": "0xFF558B2F",
+    "mapX": 0.3,
+    "mapY": 0.84
   },
   {
     "id": "encounter_3",
@@ -21,7 +25,9 @@
     "enemyIds": ["wolf", "wolf", "wolf"],
     "difficulty": 3,
     "backgroundGradientStart": "0xFF3E2723",
-    "backgroundGradientEnd": "0xFF4E342E"
+    "backgroundGradientEnd": "0xFF4E342E",
+    "mapX": 0.7,
+    "mapY": 0.76
   },
   {
     "id": "encounter_4",
@@ -29,7 +35,9 @@
     "enemyIds": ["skeleton", "skeleton", "skeleton"],
     "difficulty": 4,
     "backgroundGradientStart": "0xFF263238",
-    "backgroundGradientEnd": "0xFF37474F"
+    "backgroundGradientEnd": "0xFF37474F",
+    "mapX": 0.4,
+    "mapY": 0.68
   },
   {
     "id": "encounter_5",
@@ -37,7 +45,9 @@
     "enemyIds": ["dark_mage", "skeleton"],
     "difficulty": 5,
     "backgroundGradientStart": "0xFF4A148C",
-    "backgroundGradientEnd": "0xFF6A1B9A"
+    "backgroundGradientEnd": "0xFF6A1B9A",
+    "mapX": 0.65,
+    "mapY": 0.60
   },
   {
     "id": "encounter_6",
@@ -45,7 +55,9 @@
     "enemyIds": ["orc", "orc", "goblin"],
     "difficulty": 6,
     "backgroundGradientStart": "0xFF3E2723",
-    "backgroundGradientEnd": "0xFF5D4037"
+    "backgroundGradientEnd": "0xFF5D4037",
+    "mapX": 0.25,
+    "mapY": 0.52
   },
   {
     "id": "encounter_7",
@@ -53,7 +65,9 @@
     "enemyIds": ["dark_mage", "dark_mage", "orc"],
     "difficulty": 7,
     "backgroundGradientStart": "0xFF1A237E",
-    "backgroundGradientEnd": "0xFF311B92"
+    "backgroundGradientEnd": "0xFF311B92",
+    "mapX": 0.55,
+    "mapY": 0.44
   },
   {
     "id": "encounter_8",
@@ -61,7 +75,9 @@
     "enemyIds": ["dragon"],
     "difficulty": 8,
     "backgroundGradientStart": "0xFFB71C1C",
-    "backgroundGradientEnd": "0xFF880E4F"
+    "backgroundGradientEnd": "0xFF880E4F",
+    "mapX": 0.75,
+    "mapY": 0.36
   },
   {
     "id": "encounter_9",
@@ -69,7 +85,9 @@
     "enemyIds": ["bandit", "bandit", "bandit"],
     "difficulty": 5,
     "backgroundGradientStart": "0xFF4E342E",
-    "backgroundGradientEnd": "0xFF6D4C41"
+    "backgroundGradientEnd": "0xFF6D4C41",
+    "mapX": 0.35,
+    "mapY": 0.36
   },
   {
     "id": "encounter_10",
@@ -77,7 +95,9 @@
     "enemyIds": ["ghost", "ghost", "skeleton"],
     "difficulty": 6,
     "backgroundGradientStart": "0xFF37474F",
-    "backgroundGradientEnd": "0xFF546E7A"
+    "backgroundGradientEnd": "0xFF546E7A",
+    "mapX": 0.2,
+    "mapY": 0.28
   },
   {
     "id": "encounter_11",
@@ -85,7 +105,9 @@
     "enemyIds": ["golem", "golem"],
     "difficulty": 7,
     "backgroundGradientStart": "0xFF455A64",
-    "backgroundGradientEnd": "0xFF607D8B"
+    "backgroundGradientEnd": "0xFF607D8B",
+    "mapX": 0.6,
+    "mapY": 0.24
   },
   {
     "id": "encounter_12",
@@ -93,7 +115,9 @@
     "enemyIds": ["ice_elemental", "ice_elemental", "ghost"],
     "difficulty": 8,
     "backgroundGradientStart": "0xFF006064",
-    "backgroundGradientEnd": "0xFF00838F"
+    "backgroundGradientEnd": "0xFF00838F",
+    "mapX": 0.4,
+    "mapY": 0.18
   },
   {
     "id": "encounter_13",
@@ -101,7 +125,9 @@
     "enemyIds": ["necromancer", "skeleton", "ghost"],
     "difficulty": 9,
     "backgroundGradientStart": "0xFF311B92",
-    "backgroundGradientEnd": "0xFF4A148C"
+    "backgroundGradientEnd": "0xFF4A148C",
+    "mapX": 0.7,
+    "mapY": 0.14
   },
   {
     "id": "encounter_14",
@@ -109,7 +135,9 @@
     "enemyIds": ["orc", "bandit", "dark_mage", "golem"],
     "difficulty": 9,
     "backgroundGradientStart": "0xFF1A237E",
-    "backgroundGradientEnd": "0xFF283593"
+    "backgroundGradientEnd": "0xFF283593",
+    "mapX": 0.3,
+    "mapY": 0.08
   },
   {
     "id": "encounter_15",
@@ -117,6 +145,8 @@
     "enemyIds": ["necromancer", "dragon"],
     "difficulty": 10,
     "backgroundGradientStart": "0xFF880E4F",
-    "backgroundGradientEnd": "0xFF4A148C"
+    "backgroundGradientEnd": "0xFF4A148C",
+    "mapX": 0.5,
+    "mapY": 0.02
   }
 ]

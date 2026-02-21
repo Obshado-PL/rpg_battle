@@ -1,0 +1,55 @@
+{
+  "slime": [
+    {"itemId": "potion", "dropChance": 0.3}
+  ],
+  "goblin": [
+    {"itemId": "potion", "dropChance": 0.4},
+    {"itemId": "ether", "dropChance": 0.15}
+  ],
+  "wolf": [
+    {"itemId": "potion", "dropChance": 0.25}
+  ],
+  "skeleton": [
+    {"itemId": "potion", "dropChance": 0.2},
+    {"itemId": "iron_sword", "isEquipment": true, "dropChance": 0.1}
+  ],
+  "dark_mage": [
+    {"itemId": "ether", "dropChance": 0.4},
+    {"itemId": "mystic_staff", "isEquipment": true, "dropChance": 0.1}
+  ],
+  "orc": [
+    {"itemId": "hi_potion", "dropChance": 0.3},
+    {"itemId": "chainmail", "isEquipment": true, "dropChance": 0.08}
+  ],
+  "troll": [
+    {"itemId": "hi_potion", "dropChance": 0.35},
+    {"itemId": "power_ring", "isEquipment": true, "dropChance": 0.07}
+  ],
+  "dragon": [
+    {"itemId": "mega_potion", "dropChance": 0.5},
+    {"itemId": "elixir", "dropChance": 0.3},
+    {"itemId": "steel_blade", "isEquipment": true, "dropChance": 0.15},
+    {"itemId": "hero_medal", "isEquipment": true, "dropChance": 0.1}
+  ],
+  "bandit": [
+    {"itemId": "potion", "dropChance": 0.3},
+    {"itemId": "hi_potion", "dropChance": 0.15},
+    {"itemId": "speed_boots", "isEquipment": true, "dropChance": 0.05}
+  ],
+  "ghost": [
+    {"itemId": "ether", "dropChance": 0.35},
+    {"itemId": "magic_amulet", "isEquipment": true, "dropChance": 0.07}
+  ],
+  "golem": [
+    {"itemId": "hi_potion", "dropChance": 0.3},
+    {"itemId": "plate_armor", "isEquipment": true, "dropChance": 0.06}
+  ],
+  "ice_elemental": [
+    {"itemId": "ether", "dropChance": 0.4},
+    {"itemId": "enchanted_robe", "isEquipment": true, "dropChance": 0.06}
+  ],
+  "necromancer": [
+    {"itemId": "elixir", "dropChance": 0.4},
+    {"itemId": "arcane_rod", "isEquipment": true, "dropChance": 0.12}
+  ]
+}

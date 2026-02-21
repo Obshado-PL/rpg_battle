@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/enemy.dart';
+import '../../../data/models/status_effect.dart';
 import '../../animation/battle_animation_controller.dart';
 import '../common/hp_bar.dart';
 
@@ -255,8 +256,32 @@ class _EnemySpriteState extends State<EnemySprite>
           width: 60,
           child: HpBar(percent: enemy.hpPercent, height: 4),
         ),
+        // Status effect icons
+        if (enemy.statusEffects.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Wrap(
+              spacing: 1,
+              children: enemy.statusEffects.map((e) {
+                final (icon, color) = _statusIcon(e.type);
+                return Icon(icon, size: 9, color: color);
+              }).toList(),
+            ),
+          ),
       ],
     );
+  }
+
+  static (IconData, Color) _statusIcon(StatusEffectType type) {
+    return switch (type) {
+      StatusEffectType.poison => (Icons.science, Colors.green),
+      StatusEffectType.burn => (Icons.local_fire_department, Colors.orange),
+      StatusEffectType.stun => (Icons.flash_on, Colors.yellow),
+      StatusEffectType.atkUp => (Icons.arrow_upward, Colors.red),
+      StatusEffectType.atkDown => (Icons.arrow_downward, Colors.red),
+      StatusEffectType.defUp => (Icons.arrow_upward, Colors.blue),
+      StatusEffectType.defDown => (Icons.arrow_downward, Colors.blue),
+    };
   }
 
   Widget _getEnemyIcon(Enemy enemy) {

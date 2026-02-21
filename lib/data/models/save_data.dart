@@ -1,4 +1,5 @@
 import 'character.dart';
+import 'difficulty.dart';
 import 'item.dart';
 
 class SaveData {
@@ -8,15 +9,21 @@ class SaveData {
   final int gold;
   final Set<String> clearedEncounters;
   final Set<String> ownedEquipment;
+  final Difficulty difficulty;
+  final Map<String, int> bestiaryDefeats;
+  final Map<String, String> skillTreeChoices;
   final String savedAt;
 
   const SaveData({
-    this.version = 1,
+    this.version = 3,
     required this.party,
     required this.inventory,
     required this.gold,
     required this.clearedEncounters,
     required this.ownedEquipment,
+    this.difficulty = Difficulty.normal,
+    this.bestiaryDefeats = const {},
+    this.skillTreeChoices = const {},
     required this.savedAt,
   });
 
@@ -29,6 +36,9 @@ class SaveData {
         'gold': gold,
         'clearedEncounters': clearedEncounters.toList(),
         'ownedEquipment': ownedEquipment.toList(),
+        'difficulty': difficulty.name,
+        'bestiaryDefeats': bestiaryDefeats,
+        'skillTreeChoices': skillTreeChoices,
         'savedAt': savedAt,
       };
 
@@ -49,6 +59,16 @@ class SaveData {
           (json['clearedEncounters'] as List).cast<String>().toSet(),
       ownedEquipment:
           (json['ownedEquipment'] as List).cast<String>().toSet(),
+      difficulty: Difficulty.values.firstWhere(
+        (d) => d.name == (json['difficulty'] as String?),
+        orElse: () => Difficulty.normal,
+      ),
+      bestiaryDefeats: (json['bestiaryDefeats'] as Map<String, dynamic>?)
+              ?.map((k, v) => MapEntry(k, v as int)) ??
+          {},
+      skillTreeChoices: (json['skillTreeChoices'] as Map<String, dynamic>?)
+              ?.map((k, v) => MapEntry(k, v as String)) ??
+          {},
       savedAt: json['savedAt'] as String,
     );
   }

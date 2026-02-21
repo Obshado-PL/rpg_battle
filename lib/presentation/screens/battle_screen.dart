@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/datasources/game_data.dart';
 import '../../data/models/battle_action.dart';
 import '../../data/models/battle_state.dart';
+import '../../data/models/difficulty.dart';
 import '../../data/models/encounter.dart';
 import '../../domain/battle_engine.dart';
+import '../../domain/loot_system.dart';
 import '../../domain/sound_manager.dart';
+import '../widgets/common/dialogue_overlay.dart';
 import '../../presentation/providers/game_providers.dart';
 import '../animation/battle_animation_controller.dart';
 import '../animation/vfx_overlay.dart';
@@ -86,6 +89,7 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
   void _startBattle() {
     final party = ref.read(partyProvider);
     final inventory = ref.read(inventoryProvider);
+    final difficulty = ref.read(difficultyProvider);
     final notifier = ref.read(battleProvider.notifier);
 
     // Start battle BGM
@@ -98,6 +102,7 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
       encounter: widget.encounter,
       party: party,
       inventory: inventory,
+      difficulty: difficulty,
     );
     setState(() => _battleStarted = true);
   }
@@ -362,6 +367,38 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
         .read(inventoryProvider.notifier)
         .updateInventory(battleState.inventory);
 
+    // Roll loot drops
+    final gameData = ref.read(gameDataProvider);
+    final difficulty = ref.read(difficultyProvider);
+    final diffConfig = DifficultyConfig.get(difficulty);
+    final lootTable =
+        gameData.getLootTableForEncounter(widget.encounter);
+    final ownedEquipment = ref.read(ownedEquipmentProvider);
+    final lootResult = LootSystem().rollLoot(
+      lootTable: lootTable,
+      ownedEquipment: ownedEquipment,
+      rewardScale: diffConfig.rewardScale,
+    );
+
+    // Add loot items to inventory
+    for (final itemLoot in lootResult.items) {
+      ref
+          .read(inventoryProvider.notifier)
+          .addItem(itemLoot.itemId, itemLoot.quantity);
+    }
+
+    // Add loot equipment to owned
+    if (lootResult.equipmentIds.isNotEmpty) {
+      ref
+          .read(ownedEquipmentProvider.notifier)
+          .addAll(lootResult.equipmentIds);
+    }
+
+    // Record bestiary defeats
+    ref
+        .read(bestiaryProvider.notifier)
+        .recordDefeats(widget.encounter.enemyIds);
+
     // Mark encounter cleared
     ref.read(clearedEncountersProvider.notifier).state = {
       ...ref.read(clearedEncountersProvider),
@@ -423,13 +460,78 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
                 ),
               );
             }),
+            // Loot drops
+            if (!lootResult.isEmpty) ...[
+              const SizedBox(height: 12),
+              const Divider(color: Colors.white24),
+              const SizedBox(height: 8),
+              const Text(
+                'Loot Drops',
+                style: TextStyle(
+                  color: Colors.tealAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 6),
+              ...lootResult.items.map((loot) {
+                final item = gameData.items[loot.itemId];
+                final name = item?.name ?? loot.itemId;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 1),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.inventory_2,
+                          size: 14, color: Colors.tealAccent),
+                      const SizedBox(width: 6),
+                      Text(
+                        '$name x${loot.quantity}',
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              ...lootResult.equipmentIds.map((eqId) {
+                final eq = gameData.equipment[eqId];
+                final name = eq?.name ?? eqId;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 1),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.shield,
+                          size: 14, color: Colors.orangeAccent),
+                      const SizedBox(width: 6),
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          color: Colors.orangeAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Text(
+                        'NEW!',
+                        style: TextStyle(
+                          color: Colors.yellow,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
           ],
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              Navigator.of(context).pop();
+              _showPostBattleDialogue();
             },
             child:
                 const Text('Continue', style: TextStyle(color: Colors.amber)),
@@ -437,6 +539,29 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
         ],
       ),
     );
+  }
+
+  void _showPostBattleDialogue() {
+    final gameData = ref.read(gameDataProvider);
+    final story = gameData.storyData[widget.encounter.id];
+
+    if (story != null && story.postBattle.isNotEmpty) {
+      showGeneralDialog(
+        context: context,
+        barrierDismissible: false,
+        pageBuilder: (ctx, anim1, anim2) {
+          return DialogueOverlay(
+            lines: story.postBattle,
+            onComplete: () {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).pop();
+            },
+          );
+        },
+      );
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 
   void _showDefeatDialog() {

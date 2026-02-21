@@ -1,4 +1,5 @@
 import 'stats.dart';
+import 'status_effect.dart';
 
 enum AiBehavior { aggressive, defensive, random, boss }
 
@@ -12,6 +13,7 @@ class Enemy {
   final int xpReward;
   final int goldReward;
   final String spriteColor;
+  final List<StatusEffect> statusEffects;
 
   const Enemy({
     required this.id,
@@ -23,6 +25,7 @@ class Enemy {
     required this.xpReward,
     required this.goldReward,
     required this.spriteColor,
+    this.statusEffects = const [],
   });
 
   bool get isAlive => currentHp > 0;
@@ -38,6 +41,7 @@ class Enemy {
     int? xpReward,
     int? goldReward,
     String? spriteColor,
+    List<StatusEffect>? statusEffects,
   }) {
     return Enemy(
       id: id ?? this.id,
@@ -49,6 +53,7 @@ class Enemy {
       xpReward: xpReward ?? this.xpReward,
       goldReward: goldReward ?? this.goldReward,
       spriteColor: spriteColor ?? this.spriteColor,
+      statusEffects: statusEffects ?? this.statusEffects,
     );
   }
 

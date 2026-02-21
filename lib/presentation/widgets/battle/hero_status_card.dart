@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/models/character.dart';
 import '../../../data/models/stats.dart';
+import '../../../data/models/status_effect.dart';
 import '../../animation/battle_animation_controller.dart';
 import '../common/hp_bar.dart';
 import '../common/mp_bar.dart';
@@ -259,6 +260,17 @@ class _HeroStatusCardState extends State<HeroStatusCard>
                       ),
                     ],
                   ),
+                  if (hero.statusEffects.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Wrap(
+                        spacing: 2,
+                        children: hero.statusEffects.map((e) {
+                          final (icon, color) = _statusIcon(e.type);
+                          return Icon(icon, size: 10, color: color);
+                        }).toList(),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -290,5 +302,17 @@ class _HeroStatusCardState extends State<HeroStatusCard>
         break;
     }
     return Icon(iconData, size: 12, color: iconColor);
+  }
+
+  static (IconData, Color) _statusIcon(StatusEffectType type) {
+    return switch (type) {
+      StatusEffectType.poison => (Icons.science, Colors.green),
+      StatusEffectType.burn => (Icons.local_fire_department, Colors.orange),
+      StatusEffectType.stun => (Icons.flash_on, Colors.yellow),
+      StatusEffectType.atkUp => (Icons.arrow_upward, Colors.red),
+      StatusEffectType.atkDown => (Icons.arrow_downward, Colors.red),
+      StatusEffectType.defUp => (Icons.arrow_upward, Colors.blue),
+      StatusEffectType.defDown => (Icons.arrow_downward, Colors.blue),
+    };
   }
 }

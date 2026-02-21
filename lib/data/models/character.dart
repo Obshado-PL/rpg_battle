@@ -1,4 +1,5 @@
 import 'stats.dart';
+import 'status_effect.dart';
 
 enum HeroClass { warrior, mage, healer, rogue }
 
@@ -16,6 +17,7 @@ class Character {
   final String? weaponId;
   final String? armorId;
   final String? accessoryId;
+  final List<StatusEffect> statusEffects;
 
   const Character({
     required this.id,
@@ -31,6 +33,7 @@ class Character {
     this.weaponId,
     this.armorId,
     this.accessoryId,
+    this.statusEffects = const [],
   });
 
   bool get isAlive => currentHp > 0;
@@ -53,6 +56,7 @@ class Character {
     Object? weaponId = _undefined,
     Object? armorId = _undefined,
     Object? accessoryId = _undefined,
+    List<StatusEffect>? statusEffects,
   }) {
     return Character(
       id: id ?? this.id,
@@ -68,6 +72,7 @@ class Character {
       weaponId: weaponId == _undefined ? this.weaponId : weaponId as String?,
       armorId: armorId == _undefined ? this.armorId : armorId as String?,
       accessoryId: accessoryId == _undefined ? this.accessoryId : accessoryId as String?,
+      statusEffects: statusEffects ?? this.statusEffects,
     );
   }
 

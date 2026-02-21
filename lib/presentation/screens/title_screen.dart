@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/datasources/game_data.dart';
 import '../../data/models/character.dart';
+import '../../data/models/difficulty.dart';
 import '../../data/models/encounter.dart';
 import '../../data/models/item.dart';
 import '../../domain/sound_manager.dart';
 import '../providers/game_providers.dart';
 import 'battle_screen.dart';
+import 'bestiary_screen.dart';
 import 'equipment_screen.dart';
 import 'shop_screen.dart';
+import 'skill_tree_screen.dart';
+import '../widgets/common/dialogue_overlay.dart';
+import '../widgets/world_map/world_map_widget.dart';
 
 class TitleScreen extends ConsumerWidget {
   const TitleScreen({super.key});
@@ -22,6 +26,7 @@ class TitleScreen extends ConsumerWidget {
     final party = ref.watch(partyProvider);
     final isMuted = ref.watch(soundMutedProvider);
     final soundManager = ref.watch(soundManagerProvider);
+    final difficulty = ref.watch(difficultyProvider);
 
     // Play title BGM (no-op if already playing)
     soundManager.playBgm(BgmType.title);
@@ -106,23 +111,66 @@ class TitleScreen extends ConsumerWidget {
                 ),
               ),
 
-              const SizedBox(height: 8),
-
-              // Encounter list
-              Expanded(
-                child: _buildEncounterList(
-                    context, ref, gameData, clearedEncounters),
+              // Difficulty selector
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: Difficulty.values.map((d) {
+                    final isSelected = d == difficulty;
+                    final label = d.name[0].toUpperCase() + d.name.substring(1);
+                    final color = switch (d) {
+                      Difficulty.easy => Colors.green,
+                      Difficulty.normal => Colors.amber,
+                      Difficulty.hard => Colors.red,
+                    };
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: ChoiceChip(
+                        label: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: isSelected ? Colors.white : Colors.white54,
+                          ),
+                        ),
+                        selected: isSelected,
+                        selectedColor: color.withValues(alpha: 0.6),
+                        backgroundColor: Colors.grey[900],
+                        side: BorderSide(
+                          color: isSelected ? color : Colors.transparent,
+                        ),
+                        onSelected: (_) {
+                          ref.read(difficultyProvider.notifier).state = d;
+                        },
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
 
-              // Action buttons
+              const SizedBox(height: 8),
+
+              // World map
+              Expanded(
+                child: WorldMapWidget(
+                  encounters: gameData.encounters,
+                  clearedEncounters: clearedEncounters,
+                  onEncounterTap: (encounter) =>
+                      _startBattle(context, ref, encounter),
+                ),
+              ),
+
+              // Action buttons - Row 1
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(right: 4),
+                        padding: const EdgeInsets.only(right: 3),
                         child: ElevatedButton.icon(
                           onPressed: () {
                             Navigator.push(
@@ -132,17 +180,17 @@ class TitleScreen extends ConsumerWidget {
                             );
                           },
                           icon: const Icon(Icons.store, size: 14),
-                          label: const Text('Shop'),
+                          label: const Text('Shop', style: TextStyle(fontSize: 11)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber[800],
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                           ),
                         ),
                       ),
                     ),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
                         child: ElevatedButton.icon(
                           onPressed: () {
                             Navigator.push(
@@ -152,17 +200,65 @@ class TitleScreen extends ConsumerWidget {
                             );
                           },
                           icon: const Icon(Icons.shield, size: 14),
-                          label: const Text('Equip'),
+                          label: const Text('Equip', style: TextStyle(fontSize: 11)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.cyan[700],
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                           ),
                         ),
                       ),
                     ),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 4),
+                        padding: const EdgeInsets.only(left: 3),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const SkillTreeScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.account_tree, size: 14),
+                          label: const Text('Skills', style: TextStyle(fontSize: 11)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple[700],
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Action buttons - Row 2
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 3),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const BestiaryScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.menu_book, size: 14),
+                          label: const Text('Bestiary', style: TextStyle(fontSize: 11)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal[700],
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 3),
                         child: ElevatedButton.icon(
                           onPressed: () {
                             ref.read(partyProvider.notifier).healAll();
@@ -174,10 +270,10 @@ class TitleScreen extends ConsumerWidget {
                             );
                           },
                           icon: const Icon(Icons.favorite, size: 14),
-                          label: const Text('Heal'),
+                          label: const Text('Heal', style: TextStyle(fontSize: 11)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green[700],
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                           ),
                         ),
                       ),
@@ -256,6 +352,10 @@ class TitleScreen extends ConsumerWidget {
     ref.read(clearedEncountersProvider.notifier).state = {};
     // Reset owned equipment to starter set
     ref.read(ownedEquipmentProvider.notifier).reset();
+    // Reset difficulty, bestiary, skill tree choices
+    ref.read(difficultyProvider.notifier).state = Difficulty.normal;
+    ref.read(bestiaryProvider.notifier).reset();
+    ref.read(skillTreeChoicesProvider.notifier).reset();
     // Delete saved data
     ref.read(saveManagerProvider).deleteSave();
   }
@@ -310,129 +410,31 @@ class TitleScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEncounterList(
-    BuildContext context,
-    WidgetRef ref,
-    GameData gameData,
-    Set<String> clearedEncounters,
-  ) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: gameData.encounters.length,
-      itemBuilder: (context, index) {
-        final encounter = gameData.encounters[index];
-        final isCleared = clearedEncounters.contains(encounter.id);
-        final prevCleared =
-            index == 0 || clearedEncounters.contains(gameData.encounters[index - 1].id);
-        final isLocked = !prevCleared && !isCleared;
+  void _startBattle(BuildContext context, WidgetRef ref, Encounter encounter) {
+    final gameData = ref.read(gameDataProvider);
+    final story = gameData.storyData[encounter.id];
 
-        final gradStart =
-            Color(int.parse(encounter.backgroundGradientStart));
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Material(
-            color: isLocked
-                ? Colors.grey[900]
-                : gradStart.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: isLocked
-                  ? null
-                  : () => _startBattle(context, encounter),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isCleared
-                        ? Colors.green.withValues(alpha: 0.5)
-                        : isLocked
-                            ? Colors.grey.withValues(alpha: 0.2)
-                            : Colors.white.withValues(alpha: 0.1),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    // Encounter number
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: isCleared
-                            ? Colors.green
-                            : isLocked
-                                ? Colors.grey[800]
-                                : gradStart,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: isCleared
-                            ? const Icon(Icons.check,
-                                size: 16, color: Colors.white)
-                            : isLocked
-                                ? const Icon(Icons.lock,
-                                    size: 14, color: Colors.grey)
-                                : Text(
-                                    '${index + 1}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            encounter.name,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: isLocked
-                                      ? Colors.grey
-                                      : Colors.white,
-                                ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${encounter.enemyIds.length} enemies  |  Difficulty ${encounter.difficulty}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: isLocked
-                                      ? Colors.grey[700]
-                                      : Colors.white54,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Arrow
-                    if (!isLocked)
-                      Icon(
-                        Icons.play_arrow,
-                        color: isCleared ? Colors.green : Colors.white54,
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+    if (story != null && story.preBattle.isNotEmpty) {
+      // Show pre-battle dialogue first
+      showGeneralDialog(
+        context: context,
+        barrierDismissible: false,
+        pageBuilder: (ctx, anim1, anim2) {
+          return DialogueOverlay(
+            lines: story.preBattle,
+            onComplete: () {
+              Navigator.of(ctx).pop();
+              _navigateToBattle(context, encounter);
+            },
+          );
+        },
+      );
+    } else {
+      _navigateToBattle(context, encounter);
+    }
   }
 
-  void _startBattle(BuildContext context, Encounter encounter) {
+  void _navigateToBattle(BuildContext context, Encounter encounter) {
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
