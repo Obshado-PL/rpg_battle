@@ -48,6 +48,12 @@ class AppTheme {
   static const criticalColor = Color(0xFFFFEB3B);
   static const healColor = Color(0xFF66BB6A);
   static const damageColor = Color(0xFFFF5252);
+  static const missColor = Color(0xFFB0BEC5);
+  static const shieldColor = Color(0xFF42A5F5);
+  static const fireColor = Color(0xFFFF6D00);
+  static const iceColor = Color(0xFF00BCD4);
+  static const physicalColor = Color(0xFFE0E0E0);
+  static const poisonColor = Color(0xFF9C27B0);
 
   static Color hpColor(double percent) {
     if (percent > 0.5) return hpBarGreen;

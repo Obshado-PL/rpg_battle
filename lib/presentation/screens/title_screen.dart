@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/datasources/game_data.dart';
+import '../../data/models/character.dart';
 import '../../data/models/encounter.dart';
+import '../../data/models/item.dart';
+import '../../domain/sound_manager.dart';
 import '../providers/game_providers.dart';
 import 'battle_screen.dart';
+import 'equipment_screen.dart';
+import 'shop_screen.dart';
 
 class TitleScreen extends ConsumerWidget {
   const TitleScreen({super.key});
@@ -15,6 +20,11 @@ class TitleScreen extends ConsumerWidget {
     final gold = ref.watch(goldProvider);
     final clearedEncounters = ref.watch(clearedEncountersProvider);
     final party = ref.watch(partyProvider);
+    final isMuted = ref.watch(soundMutedProvider);
+    final soundManager = ref.watch(soundManagerProvider);
+
+    // Play title BGM (no-op if already playing)
+    soundManager.playBgm(BgmType.title);
 
     return Scaffold(
       body: Container(
@@ -47,11 +57,29 @@ class TitleScreen extends ConsumerWidget {
                     ),
               ),
               const SizedBox(height: 8),
-              Text(
-                'Turn-Based Combat',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white54,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Turn-Based Combat',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white54,
+                        ),
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: () {
+                      soundManager.toggleMute();
+                      ref.read(soundMutedProvider.notifier).state =
+                          soundManager.muted;
+                    },
+                    child: Icon(
+                      isMuted ? Icons.volume_off : Icons.volume_up,
+                      color: Colors.white38,
+                      size: 16,
                     ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 16),
@@ -86,23 +114,90 @@ class TitleScreen extends ConsumerWidget {
                     context, ref, gameData, clearedEncounters),
               ),
 
-              // Heal button
+              // Action buttons
               Padding(
-                padding: const EdgeInsets.all(16),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    ref.read(partyProvider.notifier).healAll();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Party fully healed!'),
-                        duration: Duration(seconds: 1),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 4),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const ShopScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.store, size: 14),
+                          label: const Text('Shop'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber[800],
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.favorite, size: 16),
-                  label: const Text('Rest & Heal'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green[700],
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const EquipmentScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.shield, size: 14),
+                          label: const Text('Equip'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.cyan[700],
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            ref.read(partyProvider.notifier).healAll();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Party fully healed!'),
+                                duration: Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.favorite, size: 14),
+                          label: const Text('Heal'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green[700],
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // New Game button
+              Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                child: TextButton.icon(
+                  onPressed: () => _confirmNewGame(context, ref),
+                  icon: const Icon(Icons.refresh, size: 12, color: Colors.white38),
+                  label: Text(
+                    'New Game',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.white38),
                   ),
                 ),
               ),
@@ -113,7 +208,59 @@ class TitleScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPartyPreview(BuildContext context, List party) {
+  void _confirmNewGame(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        title: const Text('New Game',
+            style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'This will erase all progress. Are you sure?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _resetGame(ref);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('New game started!'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            },
+            child: const Text('Reset', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _resetGame(WidgetRef ref) {
+    final gameData = ref.read(gameDataProvider);
+    // Reset all providers to defaults
+    ref.read(partyProvider.notifier).updateParty(gameData.defaultParty);
+    ref.read(inventoryProvider.notifier).updateInventory([
+      const InventorySlot(itemId: 'potion', quantity: 5),
+      const InventorySlot(itemId: 'hi_potion', quantity: 2),
+      const InventorySlot(itemId: 'ether', quantity: 3),
+      const InventorySlot(itemId: 'phoenix_down', quantity: 2),
+    ]);
+    ref.read(goldProvider.notifier).state = 100;
+    ref.read(clearedEncountersProvider.notifier).state = {};
+    // Reset owned equipment to starter set
+    ref.read(ownedEquipmentProvider.notifier).reset();
+    // Delete saved data
+    ref.read(saveManagerProvider).deleteSave();
+  }
+
+  Widget _buildPartyPreview(BuildContext context, List<Character> party) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -121,26 +268,19 @@ class TitleScreen extends ConsumerWidget {
         children: party.map((hero) {
           Color classColor;
           IconData classIcon;
-          switch (hero.heroClass.name) {
-            case 'warrior':
+          switch (hero.heroClass) {
+            case HeroClass.warrior:
               classColor = Colors.orange;
               classIcon = Icons.security;
-              break;
-            case 'mage':
+            case HeroClass.mage:
               classColor = Colors.purple;
               classIcon = Icons.auto_fix_high;
-              break;
-            case 'healer':
+            case HeroClass.healer:
               classColor = Colors.green;
               classIcon = Icons.favorite;
-              break;
-            case 'rogue':
+            case HeroClass.rogue:
               classColor = Colors.amber;
               classIcon = Icons.flash_on;
-              break;
-            default:
-              classColor = Colors.grey;
-              classIcon = Icons.person;
           }
 
           return Column(

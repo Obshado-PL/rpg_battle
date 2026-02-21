@@ -5,7 +5,8 @@
     "description": "Restores 50 HP to one ally.",
     "effect": "restoreHp",
     "power": 50,
-    "targetType": "singleAlly"
+    "targetType": "singleAlly",
+    "price": 30
   },
   {
     "id": "hi_potion",
@@ -13,7 +14,17 @@
     "description": "Restores 120 HP to one ally.",
     "effect": "restoreHp",
     "power": 120,
-    "targetType": "singleAlly"
+    "targetType": "singleAlly",
+    "price": 80
+  },
+  {
+    "id": "mega_potion",
+    "name": "Mega Potion",
+    "description": "Restores 250 HP to one ally.",
+    "effect": "restoreHp",
+    "power": 250,
+    "targetType": "singleAlly",
+    "price": 200
   },
   {
     "id": "ether",
@@ -21,7 +32,8 @@
     "description": "Restores 30 MP to one ally.",
     "effect": "restoreMp",
     "power": 30,
-    "targetType": "singleAlly"
+    "targetType": "singleAlly",
+    "price": 60
   },
   {
     "id": "phoenix_down",
@@ -29,6 +41,16 @@
     "description": "Revives a fallen ally with 25% HP.",
     "effect": "revive",
     "power": 25,
-    "targetType": "singleAlly"
+    "targetType": "singleAlly",
+    "price": 150
+  },
+  {
+    "id": "elixir",
+    "name": "Elixir",
+    "description": "Fully restores HP and MP to one ally.",
+    "effect": "restoreHp",
+    "power": 9999,
+    "targetType": "singleAlly",
+    "price": 500
   }
 ]

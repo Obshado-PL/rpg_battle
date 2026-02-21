@@ -2,10 +2,13 @@ import '../data/models/battle_action.dart';
 import '../data/models/battle_state.dart';
 import '../data/models/character.dart';
 import '../data/models/enemy.dart';
+import '../data/models/equipment.dart';
 import '../data/models/item.dart';
 import '../data/models/skill.dart';
+import '../data/models/stats.dart';
 import 'damage_calculator.dart';
 import 'enemy_ai.dart';
+import 'equipment_system.dart';
 import 'turn_manager.dart';
 
 class BattleAnimationEvent {
@@ -46,6 +49,7 @@ class BattleEngine {
   final EnemyAi _enemyAi;
   final Map<String, Skill> _skills;
   final Map<String, Item> _items;
+  final Map<String, Equipment> _equipment;
 
   BattleEngine({
     required TurnManager turnManager,
@@ -53,11 +57,17 @@ class BattleEngine {
     required EnemyAi enemyAi,
     required Map<String, Skill> skills,
     required Map<String, Item> items,
+    required Map<String, Equipment> equipment,
   })  : _turnManager = turnManager,
         _damageCalculator = damageCalculator,
         _enemyAi = enemyAi,
         _skills = skills,
-        _items = items;
+        _items = items,
+        _equipment = equipment;
+
+  Stats _effectiveStats(Character hero) {
+    return EquipmentSystem.computeEffectiveStats(hero, _equipment);
+  }
 
   BattleState initBattle({
     required List<Character> party,
@@ -222,7 +232,7 @@ class BattleEngine {
       final enemy = state.enemies.firstWhere((e) => e.id == targetId);
 
       final dmg = _damageCalculator.calculateBasicAttack(
-        attackStat: hero.baseStats.attack,
+        attackStat: _effectiveStats(hero).attack,
         defenseStat: enemy.stats.defense,
         isDefending: false,
       );
@@ -271,7 +281,7 @@ class BattleEngine {
 
       final dmg = _damageCalculator.calculateBasicAttack(
         attackStat: enemy.stats.attack,
-        defenseStat: hero.baseStats.defense,
+        defenseStat: _effectiveStats(hero).defense,
         isDefending: hero.isDefending,
       );
 
@@ -285,7 +295,7 @@ class BattleEngine {
         ));
       } else {
         final newHp =
-            (hero.currentHp - dmg.damage).clamp(0, hero.baseStats.maxHp);
+            (hero.currentHp - dmg.damage).clamp(0, _effectiveStats(hero).maxHp);
         final updatedParty = state.party.map((h) {
           if (h.id == targetId) return h.copyWith(currentHp: newHp);
           return h;
@@ -381,10 +391,8 @@ class BattleEngine {
 
     int magicAttack;
     if (action.isHero) {
-      magicAttack = state.party
-          .firstWhere((h) => h.id == action.actorId)
-          .baseStats
-          .magicAttack;
+      final caster = state.party.firstWhere((h) => h.id == action.actorId);
+      magicAttack = _effectiveStats(caster).magicAttack;
     } else {
       magicAttack = state.enemies
           .firstWhere((e) => e.id == action.actorId)
@@ -397,12 +405,38 @@ class BattleEngine {
       skillPower: skill.power,
     );
 
+    // Group heal: heal all living allies
+    if (skill.targetType == TargetType.allAllies) {
+      messages.add('$actorName casts ${skill.name}!');
+      var updatedParty = List<Character>.from(state.party);
+      for (var i = 0; i < updatedParty.length; i++) {
+        final ally = updatedParty[i];
+        if (!ally.isAlive) continue;
+        final allyMaxHp = _effectiveStats(ally).maxHp;
+        final newHp = (ally.currentHp + healAmount).clamp(0, allyMaxHp);
+        final actualHeal = newHp - ally.currentHp;
+        updatedParty[i] = ally.copyWith(currentHp: newHp);
+        if (actualHeal > 0) {
+          messages.add('${ally.name} restored $actualHeal HP!');
+          animations.add(BattleAnimationEvent(
+            type: 'heal',
+            actorId: action.actorId,
+            targetId: ally.id,
+            value: actualHeal,
+            effectKey: skill.animationKey,
+          ));
+        }
+      }
+      return state.copyWith(party: updatedParty);
+    }
+
     // Healing targets allies
     final target = state.party.firstWhere((h) => h.id == targetId);
 
     // Handle revive
     if (skill.id == 'healer_revive' && !target.isAlive) {
-      final reviveHp = (target.baseStats.maxHp * 0.25).round().clamp(1, target.baseStats.maxHp);
+      final tStats = _effectiveStats(target);
+      final reviveHp = (tStats.maxHp * 0.25).round().clamp(1, tStats.maxHp);
       final updatedParty = state.party.map((h) {
         if (h.id == targetId) return h.copyWith(currentHp: reviveHp);
         return h;
@@ -427,7 +461,7 @@ class BattleEngine {
     }
 
     final newHp =
-        (target.currentHp + healAmount).clamp(0, target.baseStats.maxHp);
+        (target.currentHp + healAmount).clamp(0, _effectiveStats(target).maxHp);
     final actualHeal = newHp - target.currentHp;
 
     final updatedParty = state.party.map((h) {
@@ -467,6 +501,7 @@ class BattleEngine {
     if (action.isHero) {
       // Hero AoE hits all enemies
       final hero = state.party.firstWhere((h) => h.id == action.actorId);
+      final heroStats = _effectiveStats(hero);
       var updatedEnemies = List<Enemy>.from(state.enemies);
 
       for (var i = 0; i < updatedEnemies.length; i++) {
@@ -476,13 +511,13 @@ class BattleEngine {
         DamageResult dmg;
         if (skill.type == SkillType.magical) {
           dmg = _damageCalculator.calculateMagicalDamage(
-            magicAttackStat: hero.baseStats.magicAttack,
+            magicAttackStat: heroStats.magicAttack,
             magicDefenseStat: enemy.stats.magicDefense,
             skillPower: skill.power,
           );
         } else {
           dmg = _damageCalculator.calculatePhysicalDamage(
-            attackStat: hero.baseStats.attack,
+            attackStat: heroStats.attack,
             defenseStat: enemy.stats.defense,
             skillPower: skill.power,
             accuracy: skill.accuracy,
@@ -520,18 +555,19 @@ class BattleEngine {
         final hero = updatedParty[i];
         if (!hero.isAlive) continue;
 
+        final heroStats = _effectiveStats(hero);
         DamageResult dmg;
         if (skill.type == SkillType.magical) {
           dmg = _damageCalculator.calculateMagicalDamage(
             magicAttackStat: enemy.stats.magicAttack,
-            magicDefenseStat: hero.baseStats.magicDefense,
+            magicDefenseStat: heroStats.magicDefense,
             skillPower: skill.power,
             isDefending: hero.isDefending,
           );
         } else {
           dmg = _damageCalculator.calculatePhysicalDamage(
             attackStat: enemy.stats.attack,
-            defenseStat: hero.baseStats.defense,
+            defenseStat: heroStats.defense,
             skillPower: skill.power,
             accuracy: skill.accuracy,
             isDefending: hero.isDefending,
@@ -540,7 +576,7 @@ class BattleEngine {
 
         if (!dmg.isMiss) {
           final newHp =
-              (hero.currentHp - dmg.damage).clamp(0, hero.baseStats.maxHp);
+              (hero.currentHp - dmg.damage).clamp(0, heroStats.maxHp);
           updatedParty[i] = hero.copyWith(currentHp: newHp);
           messages.add('${hero.name} takes ${dmg.damage} damage!');
 
@@ -575,18 +611,19 @@ class BattleEngine {
 
     if (action.isHero) {
       final hero = state.party.firstWhere((h) => h.id == action.actorId);
+      final heroStats = _effectiveStats(hero);
       final enemy = state.enemies.firstWhere((e) => e.id == targetId);
 
       DamageResult dmg;
       if (skill.type == SkillType.magical) {
         dmg = _damageCalculator.calculateMagicalDamage(
-          magicAttackStat: hero.baseStats.magicAttack,
+          magicAttackStat: heroStats.magicAttack,
           magicDefenseStat: enemy.stats.magicDefense,
           skillPower: skill.power,
         );
       } else {
         dmg = _damageCalculator.calculatePhysicalDamage(
-          attackStat: hero.baseStats.attack,
+          attackStat: heroStats.attack,
           defenseStat: enemy.stats.defense,
           skillPower: skill.power,
           accuracy: skill.accuracy,
@@ -632,19 +669,20 @@ class BattleEngine {
     } else {
       final enemy = state.enemies.firstWhere((e) => e.id == action.actorId);
       final hero = state.party.firstWhere((h) => h.id == targetId);
+      final heroStats = _effectiveStats(hero);
 
       DamageResult dmg;
       if (skill.type == SkillType.magical) {
         dmg = _damageCalculator.calculateMagicalDamage(
           magicAttackStat: enemy.stats.magicAttack,
-          magicDefenseStat: hero.baseStats.magicDefense,
+          magicDefenseStat: heroStats.magicDefense,
           skillPower: skill.power,
           isDefending: hero.isDefending,
         );
       } else {
         dmg = _damageCalculator.calculatePhysicalDamage(
           attackStat: enemy.stats.attack,
-          defenseStat: hero.baseStats.defense,
+          defenseStat: heroStats.defense,
           skillPower: skill.power,
           accuracy: skill.accuracy,
           isDefending: hero.isDefending,
@@ -660,7 +698,7 @@ class BattleEngine {
         ));
       } else {
         final newHp =
-            (hero.currentHp - dmg.damage).clamp(0, hero.baseStats.maxHp);
+            (hero.currentHp - dmg.damage).clamp(0, heroStats.maxHp);
         final updatedParty = state.party.map((h) {
           if (h.id == targetId) return h.copyWith(currentHp: newHp);
           return h;
@@ -738,6 +776,7 @@ class BattleEngine {
     final target = state.party.firstWhere((h) => h.id == targetId);
 
     var updatedParty = List<Character>.from(state.party);
+    final targetStats = _effectiveStats(target);
 
     switch (item.effect) {
       case ItemEffect.restoreHp:
@@ -747,7 +786,7 @@ class BattleEngine {
               state: state, messages: messages, animations: animations);
         }
         final newHp = (target.currentHp + item.power)
-            .clamp(0, target.baseStats.maxHp);
+            .clamp(0, targetStats.maxHp);
         final actualHeal = newHp - target.currentHp;
         updatedParty = state.party.map((h) {
           if (h.id == targetId) return h.copyWith(currentHp: newHp);
@@ -771,7 +810,7 @@ class BattleEngine {
               state: state, messages: messages, animations: animations);
         }
         final newMp = (target.currentMp + item.power)
-            .clamp(0, target.baseStats.maxMp);
+            .clamp(0, targetStats.maxMp);
         final actualRestore = newMp - target.currentMp;
         updatedParty = state.party.map((h) {
           if (h.id == targetId) return h.copyWith(currentMp: newMp);
@@ -795,7 +834,7 @@ class BattleEngine {
               state: state, messages: messages, animations: animations);
         }
         final reviveHp =
-            (target.baseStats.maxHp * item.power / 100).round().clamp(1, target.baseStats.maxHp);
+            (targetStats.maxHp * item.power / 100).round().clamp(1, targetStats.maxHp);
         updatedParty = state.party.map((h) {
           if (h.id == targetId) return h.copyWith(currentHp: reviveHp);
           return h;
@@ -823,7 +862,7 @@ class BattleEngine {
     final hasBoss = state.enemies.any((e) => e.behavior == AiBehavior.boss);
     final partyAvgSpeed = state.party
             .where((h) => h.isAlive)
-            .fold<int>(0, (sum, h) => sum + h.baseStats.speed) ~/
+            .fold<int>(0, (sum, h) => sum + _effectiveStats(h).speed) ~/
         state.party.where((h) => h.isAlive).length.clamp(1, 99);
     final enemyAvgSpeed = state.enemies
             .where((e) => e.isAlive)

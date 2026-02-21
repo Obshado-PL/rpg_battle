@@ -62,5 +62,61 @@
     "difficulty": 8,
     "backgroundGradientStart": "0xFFB71C1C",
     "backgroundGradientEnd": "0xFF880E4F"
+  },
+  {
+    "id": "encounter_9",
+    "name": "Bandit Camp",
+    "enemyIds": ["bandit", "bandit", "bandit"],
+    "difficulty": 5,
+    "backgroundGradientStart": "0xFF4E342E",
+    "backgroundGradientEnd": "0xFF6D4C41"
+  },
+  {
+    "id": "encounter_10",
+    "name": "Haunted Ruins",
+    "enemyIds": ["ghost", "ghost", "skeleton"],
+    "difficulty": 6,
+    "backgroundGradientStart": "0xFF37474F",
+    "backgroundGradientEnd": "0xFF546E7A"
+  },
+  {
+    "id": "encounter_11",
+    "name": "Golem Cave",
+    "enemyIds": ["golem", "golem"],
+    "difficulty": 7,
+    "backgroundGradientStart": "0xFF455A64",
+    "backgroundGradientEnd": "0xFF607D8B"
+  },
+  {
+    "id": "encounter_12",
+    "name": "Ice Cavern",
+    "enemyIds": ["ice_elemental", "ice_elemental", "ghost"],
+    "difficulty": 8,
+    "backgroundGradientStart": "0xFF006064",
+    "backgroundGradientEnd": "0xFF00838F"
+  },
+  {
+    "id": "encounter_13",
+    "name": "Necromancer Tower",
+    "enemyIds": ["necromancer", "skeleton", "ghost"],
+    "difficulty": 9,
+    "backgroundGradientStart": "0xFF311B92",
+    "backgroundGradientEnd": "0xFF4A148C"
+  },
+  {
+    "id": "encounter_14",
+    "name": "The Gauntlet",
+    "enemyIds": ["orc", "bandit", "dark_mage", "golem"],
+    "difficulty": 9,
+    "backgroundGradientStart": "0xFF1A237E",
+    "backgroundGradientEnd": "0xFF283593"
+  },
+  {
+    "id": "encounter_15",
+    "name": "Final Showdown",
+    "enemyIds": ["necromancer", "dragon"],
+    "difficulty": 10,
+    "backgroundGradientStart": "0xFF880E4F",
+    "backgroundGradientEnd": "0xFF4A148C"
   }
 ]

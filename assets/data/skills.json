@@ -22,6 +22,17 @@
     "accuracy": 0.85
   },
   {
+    "id": "warrior_cleave",
+    "name": "Cleave",
+    "description": "A wide swing that hits all enemies.",
+    "type": "physical",
+    "targetType": "allEnemies",
+    "mpCost": 15,
+    "power": 14,
+    "animationKey": "slash",
+    "accuracy": 0.9
+  },
+  {
     "id": "mage_fireball",
     "name": "Fireball",
     "description": "Hurls a ball of fire at one enemy.",
@@ -41,6 +52,17 @@
     "mpCost": 20,
     "power": 14,
     "animationKey": "ice",
+    "accuracy": 1.0
+  },
+  {
+    "id": "mage_lightning",
+    "name": "Lightning",
+    "description": "A bolt of lightning strikes one enemy.",
+    "type": "magical",
+    "targetType": "singleEnemy",
+    "mpCost": 14,
+    "power": 26,
+    "animationKey": "lightning",
     "accuracy": 1.0
   },
   {
@@ -66,6 +88,17 @@
     "accuracy": 1.0
   },
   {
+    "id": "healer_group_heal",
+    "name": "Group Heal",
+    "description": "Restores HP to all allies.",
+    "type": "healing",
+    "targetType": "allAllies",
+    "mpCost": 22,
+    "power": 10,
+    "animationKey": "heal",
+    "accuracy": 1.0
+  },
+  {
     "id": "rogue_backstab",
     "name": "Backstab",
     "description": "A sneaky strike with high critical chance.",
@@ -86,6 +119,17 @@
     "power": 10,
     "animationKey": "dart",
     "accuracy": 0.95
+  },
+  {
+    "id": "rogue_shadowstrike",
+    "name": "Shadow Strike",
+    "description": "Strikes from the shadows with deadly precision.",
+    "type": "physical",
+    "targetType": "singleEnemy",
+    "mpCost": 14,
+    "power": 24,
+    "animationKey": "dark",
+    "accuracy": 0.92
   },
   {
     "id": "enemy_bite",
@@ -130,5 +174,49 @@
     "power": 20,
     "animationKey": "slash",
     "accuracy": 0.9
+  },
+  {
+    "id": "enemy_ghost_drain",
+    "name": "Soul Drain",
+    "description": "Drains the life force of one hero.",
+    "type": "magical",
+    "targetType": "singleEnemy",
+    "mpCost": 0,
+    "power": 18,
+    "animationKey": "drain",
+    "accuracy": 1.0
+  },
+  {
+    "id": "enemy_golem_slam",
+    "name": "Golem Slam",
+    "description": "Slams the ground with tremendous force.",
+    "type": "physical",
+    "targetType": "allEnemies",
+    "mpCost": 0,
+    "power": 16,
+    "animationKey": "slash",
+    "accuracy": 0.85
+  },
+  {
+    "id": "enemy_ice_blast",
+    "name": "Ice Blast",
+    "description": "A freezing burst of ice magic.",
+    "type": "magical",
+    "targetType": "allEnemies",
+    "mpCost": 0,
+    "power": 14,
+    "animationKey": "ice",
+    "accuracy": 1.0
+  },
+  {
+    "id": "enemy_dark_bolt",
+    "name": "Dark Bolt",
+    "description": "A bolt of dark energy.",
+    "type": "magical",
+    "targetType": "singleEnemy",
+    "mpCost": 0,
+    "power": 22,
+    "animationKey": "dark",
+    "accuracy": 1.0
   }
 ]

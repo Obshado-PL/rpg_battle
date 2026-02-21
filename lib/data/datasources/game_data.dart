@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../models/character.dart';
 import '../models/encounter.dart';
 import '../models/enemy.dart';
+import '../models/equipment.dart';
 import '../models/item.dart';
 import '../models/skill.dart';
 import '../models/stats.dart';
@@ -14,6 +15,7 @@ class GameData {
   late final Map<String, Enemy> enemyTemplates;
   late final Map<String, Item> items;
   late final List<Encounter> encounters;
+  late final Map<String, Equipment> equipment;
   late final List<Character> defaultParty;
 
   Future<void> load() async {
@@ -21,6 +23,7 @@ class GameData {
     enemyTemplates = await _loadEnemies();
     items = await _loadItems();
     encounters = await _loadEncounters();
+    equipment = await _loadEquipment();
     defaultParty = _createDefaultParty();
   }
 
@@ -63,6 +66,17 @@ class GameData {
     return list
         .map((e) => Encounter.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<Map<String, Equipment>> _loadEquipment() async {
+    final jsonStr = await rootBundle.loadString('assets/data/equipment.json');
+    final list = json.decode(jsonStr) as List;
+    final map = <String, Equipment>{};
+    for (final entry in list) {
+      final eq = Equipment.fromJson(entry as Map<String, dynamic>);
+      map[eq.id] = eq;
+    }
+    return map;
   }
 
   /// Create enemy instances from template for a given encounter.
@@ -114,6 +128,8 @@ class GameData {
         ),
         xp: 0,
         skillIds: ['warrior_slash', 'warrior_power_strike'],
+        weaponId: 'wooden_sword',
+        armorId: 'leather_vest',
       ),
       Character(
         id: 'hero_mage',
@@ -133,6 +149,8 @@ class GameData {
         ),
         xp: 0,
         skillIds: ['mage_fireball', 'mage_ice_storm'],
+        weaponId: 'apprentice_staff',
+        armorId: 'mage_robe',
       ),
       Character(
         id: 'hero_healer',
@@ -152,6 +170,9 @@ class GameData {
         ),
         xp: 0,
         skillIds: ['healer_heal', 'healer_revive'],
+        weaponId: 'apprentice_staff',
+        armorId: 'leather_vest',
+        accessoryId: 'prayer_beads',
       ),
       Character(
         id: 'hero_rogue',
@@ -171,6 +192,9 @@ class GameData {
         ),
         xp: 0,
         skillIds: ['rogue_backstab', 'rogue_poison_dart'],
+        weaponId: 'wooden_sword',
+        armorId: 'shadow_cloak',
+        accessoryId: 'rusty_dagger',
       ),
     ];
   }

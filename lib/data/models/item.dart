@@ -9,6 +9,7 @@ class Item {
   final ItemEffect effect;
   final int power;
   final TargetType targetType;
+  final int price;
 
   const Item({
     required this.id,
@@ -17,6 +18,7 @@ class Item {
     required this.effect,
     required this.power,
     required this.targetType,
+    this.price = 0,
   });
 
   factory Item.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class Item {
       targetType: TargetType.values.firstWhere(
         (e) => e.name == json['targetType'],
       ),
+      price: json['price'] as int? ?? 0,
     );
   }
 }

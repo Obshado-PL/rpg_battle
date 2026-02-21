@@ -13,6 +13,9 @@ class Character {
   final int xp;
   final List<String> skillIds;
   final bool isDefending;
+  final String? weaponId;
+  final String? armorId;
+  final String? accessoryId;
 
   const Character({
     required this.id,
@@ -25,11 +28,16 @@ class Character {
     required this.xp,
     required this.skillIds,
     this.isDefending = false,
+    this.weaponId,
+    this.armorId,
+    this.accessoryId,
   });
 
   bool get isAlive => currentHp > 0;
   double get hpPercent => currentHp / baseStats.maxHp;
   double get mpPercent => baseStats.maxMp > 0 ? currentMp / baseStats.maxMp : 0;
+
+  static const _undefined = Object();
 
   Character copyWith({
     String? id,
@@ -42,6 +50,9 @@ class Character {
     int? xp,
     List<String>? skillIds,
     bool? isDefending,
+    Object? weaponId = _undefined,
+    Object? armorId = _undefined,
+    Object? accessoryId = _undefined,
   }) {
     return Character(
       id: id ?? this.id,
@@ -54,6 +65,9 @@ class Character {
       xp: xp ?? this.xp,
       skillIds: skillIds ?? this.skillIds,
       isDefending: isDefending ?? this.isDefending,
+      weaponId: weaponId == _undefined ? this.weaponId : weaponId as String?,
+      armorId: armorId == _undefined ? this.armorId : armorId as String?,
+      accessoryId: accessoryId == _undefined ? this.accessoryId : accessoryId as String?,
     );
   }
 
@@ -71,6 +85,24 @@ class Character {
       baseStats: stats,
       xp: json['xp'] as int? ?? 0,
       skillIds: (json['skillIds'] as List<dynamic>).cast<String>(),
+      weaponId: json['weaponId'] as String?,
+      armorId: json['armorId'] as String?,
+      accessoryId: json['accessoryId'] as String?,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'heroClass': heroClass.name,
+        'level': level,
+        'currentHp': currentHp,
+        'currentMp': currentMp,
+        'baseStats': baseStats.toJson(),
+        'xp': xp,
+        'skillIds': skillIds,
+        'weaponId': weaponId,
+        'armorId': armorId,
+        'accessoryId': accessoryId,
+      };
 }

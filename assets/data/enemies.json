@@ -124,5 +124,95 @@
     "xpReward": 200,
     "goldReward": 150,
     "spriteColor": "0xFFC62828"
+  },
+  {
+    "id": "bandit",
+    "name": "Bandit",
+    "stats": {
+      "maxHp": 75,
+      "maxMp": 0,
+      "attack": 17,
+      "defense": 8,
+      "magicAttack": 3,
+      "magicDefense": 6,
+      "speed": 15
+    },
+    "behavior": "aggressive",
+    "skillIds": ["enemy_bite"],
+    "xpReward": 40,
+    "goldReward": 40,
+    "spriteColor": "0xFF6D4C41"
+  },
+  {
+    "id": "ghost",
+    "name": "Phantom",
+    "stats": {
+      "maxHp": 55,
+      "maxMp": 80,
+      "attack": 5,
+      "defense": 3,
+      "magicAttack": 20,
+      "magicDefense": 18,
+      "speed": 16
+    },
+    "behavior": "defensive",
+    "skillIds": ["enemy_ghost_drain"],
+    "xpReward": 50,
+    "goldReward": 25,
+    "spriteColor": "0xFF90CAF9"
+  },
+  {
+    "id": "golem",
+    "name": "Stone Golem",
+    "stats": {
+      "maxHp": 160,
+      "maxMp": 0,
+      "attack": 22,
+      "defense": 22,
+      "magicAttack": 4,
+      "magicDefense": 12,
+      "speed": 4
+    },
+    "behavior": "defensive",
+    "skillIds": ["enemy_golem_slam"],
+    "xpReward": 65,
+    "goldReward": 45,
+    "spriteColor": "0xFF78909C"
+  },
+  {
+    "id": "ice_elemental",
+    "name": "Ice Elemental",
+    "stats": {
+      "maxHp": 80,
+      "maxMp": 120,
+      "attack": 6,
+      "defense": 10,
+      "magicAttack": 24,
+      "magicDefense": 20,
+      "speed": 13
+    },
+    "behavior": "aggressive",
+    "skillIds": ["enemy_ice_blast"],
+    "xpReward": 60,
+    "goldReward": 35,
+    "spriteColor": "0xFF4DD0E1"
+  },
+  {
+    "id": "necromancer",
+    "name": "Necromancer",
+    "stats": {
+      "maxHp": 200,
+      "maxMp": 180,
+      "attack": 10,
+      "defense": 12,
+      "magicAttack": 28,
+      "magicDefense": 22,
+      "speed": 12
+    },
+    "behavior": "boss",
+    "skillIds": ["enemy_dark_bolt", "enemy_ghost_drain"],
+    "xpReward": 180,
+    "goldReward": 120,
+    "spriteColor": "0xFF4A148C"
   }
 ]

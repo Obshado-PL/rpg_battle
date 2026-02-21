@@ -9,11 +9,20 @@ class LevelSystem {
     return (100 * pow(currentLevel, 1.5)).round();
   }
 
+  /// Skill unlock thresholds per class.
+  static const _skillUnlocks = {
+    HeroClass.warrior: {3: 'warrior_cleave'},
+    HeroClass.mage: {3: 'mage_lightning'},
+    HeroClass.healer: {3: 'healer_group_heal'},
+    HeroClass.rogue: {3: 'rogue_shadowstrike'},
+  };
+
   /// Apply XP gain and handle level ups. Returns updated character.
   Character applyXp(Character character, int xpGained) {
     var newXp = character.xp + xpGained;
     var newLevel = character.level;
     var newStats = character.baseStats;
+    var newSkills = List<String>.from(character.skillIds);
     final levelUps = <int>[];
 
     while (newXp >= xpForNextLevel(newLevel)) {
@@ -21,12 +30,19 @@ class LevelSystem {
       newLevel++;
       newStats = _levelUpStats(newStats, character.heroClass);
       levelUps.add(newLevel);
+
+      // Check for skill unlocks at this level
+      final unlock = _skillUnlocks[character.heroClass]?[newLevel];
+      if (unlock != null && !newSkills.contains(unlock)) {
+        newSkills.add(unlock);
+      }
     }
 
     return character.copyWith(
       level: newLevel,
       xp: newXp,
       baseStats: newStats,
+      skillIds: newSkills,
       // Full heal on level up
       currentHp: levelUps.isNotEmpty ? newStats.maxHp : character.currentHp,
       currentMp: levelUps.isNotEmpty ? newStats.maxMp : character.currentMp,

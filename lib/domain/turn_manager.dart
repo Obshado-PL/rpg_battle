@@ -2,11 +2,16 @@ import 'dart:math';
 
 import '../data/models/character.dart';
 import '../data/models/enemy.dart';
+import '../data/models/equipment.dart';
+import 'equipment_system.dart';
 
 class TurnManager {
   final Random _random;
+  final Map<String, Equipment> _equipment;
 
-  TurnManager({Random? random}) : _random = random ?? Random();
+  TurnManager({Random? random, Map<String, Equipment>? equipment})
+      : _random = random ?? Random(),
+        _equipment = equipment ?? {};
 
   /// Returns ordered list of actor IDs sorted by speed (descending).
   /// Dead actors are excluded. Ties broken by small random factor.
@@ -18,9 +23,11 @@ class TurnManager {
 
     for (final hero in party) {
       if (!hero.isAlive) continue;
+      final effectiveSpeed =
+          EquipmentSystem.computeEffectiveStats(hero, _equipment).speed;
       actors.add(_ActorSpeed(
         id: hero.id,
-        speed: hero.baseStats.speed + _random.nextInt(5),
+        speed: effectiveSpeed + _random.nextInt(5),
       ));
     }
 

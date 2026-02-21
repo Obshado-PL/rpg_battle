@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/character.dart';
+import '../../../data/models/equipment.dart';
+import '../../../domain/equipment_system.dart';
+import '../../animation/battle_animation_controller.dart';
 import 'hero_status_card.dart';
 
 class PartyStatusBar extends StatelessWidget {
@@ -8,6 +11,9 @@ class PartyStatusBar extends StatelessWidget {
   final String? activeHeroId;
   final bool isSelectingAlly;
   final void Function(String heroId)? onHeroTap;
+  final Map<String, GlobalKey> targetKeys;
+  final BattleAnimationController? animationController;
+  final Map<String, Equipment> equipmentData;
 
   const PartyStatusBar({
     super.key,
@@ -15,6 +21,9 @@ class PartyStatusBar extends StatelessWidget {
     this.activeHeroId,
     this.isSelectingAlly = false,
     this.onHeroTap,
+    this.targetKeys = const {},
+    this.animationController,
+    this.equipmentData = const {},
   });
 
   @override
@@ -33,11 +42,18 @@ class PartyStatusBar extends StatelessWidget {
         itemCount: party.length,
         itemBuilder: (context, index) {
           final hero = party[index];
-          return HeroStatusCard(
-            hero: hero,
-            isActive: hero.id == activeHeroId,
-            isSelectable: isSelectingAlly && hero.isAlive,
-            onTap: () => onHeroTap?.call(hero.id),
+          return KeyedSubtree(
+            key: targetKeys[hero.id] ?? ValueKey(hero.id),
+            child: HeroStatusCard(
+              hero: hero,
+              isActive: hero.id == activeHeroId,
+              isSelectable: isSelectingAlly && hero.isAlive,
+              onTap: () => onHeroTap?.call(hero.id),
+              animationController: animationController,
+              effectiveStats: equipmentData.isNotEmpty
+                  ? EquipmentSystem.computeEffectiveStats(hero, equipmentData)
+                  : null,
+            ),
           );
         },
       ),

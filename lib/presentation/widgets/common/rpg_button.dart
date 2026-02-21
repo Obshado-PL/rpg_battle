@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RpgButton extends StatelessWidget {
+import '../../../domain/sound_manager.dart';
+import '../../providers/game_providers.dart';
+
+class RpgButton extends ConsumerWidget {
   final String label;
   final IconData? icon;
   final VoidCallback? onTap;
@@ -19,7 +23,7 @@ class RpgButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final bgColor = enabled
         ? (color ?? theme.colorScheme.primary)
@@ -32,7 +36,12 @@ class RpgButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         elevation: enabled ? 4 : 1,
         child: InkWell(
-          onTap: enabled ? onTap : null,
+          onTap: enabled
+              ? () {
+                  ref.read(soundManagerProvider).playSfx(SfxType.uiTap);
+                  onTap?.call();
+                }
+              : null,
           borderRadius: BorderRadius.circular(8),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
