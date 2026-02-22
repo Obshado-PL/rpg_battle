@@ -15,8 +15,8 @@ import '../animation/battle_animation_controller.dart';
 import '../animation/vfx_overlay.dart';
 import '../widgets/battle/action_menu.dart';
 import '../widgets/battle/battle_log.dart';
-import '../widgets/battle/enemy_formation.dart';
-import '../widgets/battle/party_status_bar.dart';
+import '../widgets/battle/battlefield_area.dart';
+import '../widgets/battle/compact_party_status_bar.dart';
 import '../widgets/battle/battle_results_dialog.dart';
 import '../widgets/battle/turn_order_bar.dart';
 
@@ -407,38 +407,38 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
                 ),
               ),
 
-              // Enemy formation (top area)
+              // Battlefield (heroes left, enemies right)
               Expanded(
-                flex: 3,
-                child: Center(
-                  child: EnemyFormation(
-                    enemies: battleState.enemies,
-                    isSelectingTarget:
-                        _currentMenuState == MenuState.targetEnemy,
-                    onEnemyTap: _onEnemyTap,
-                    targetKeys: _targetKeys,
-                    animationController: _animController,
-                  ),
+                flex: 5,
+                child: BattlefieldArea(
+                  party: battleState.party,
+                  enemies: battleState.enemies,
+                  activeHeroId: battleState.activeHeroId,
+                  isSelectingTarget:
+                      _currentMenuState == MenuState.targetEnemy,
+                  isSelectingAlly:
+                      _currentMenuState == MenuState.targetAlly,
+                  onEnemyTap: _onEnemyTap,
+                  onHeroTap: _onHeroTap,
+                  targetKeys: _targetKeys,
+                  animationController: _animController,
+                  equipmentData: gameData.equipment,
                 ),
               ),
 
               // Battle log
               BattleLog(messages: battleState.battleLog),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
 
-              // Party status
-              PartyStatusBar(
+              // Compact party status (HP/MP bars)
+              CompactPartyStatusBar(
                 party: battleState.party,
                 activeHeroId: battleState.activeHeroId,
-                isSelectingAlly: _currentMenuState == MenuState.targetAlly,
-                onHeroTap: _onHeroTap,
-                targetKeys: _targetKeys,
-                animationController: _animController,
                 equipmentData: gameData.equipment,
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
 
               // Action menu (only when it's player's turn)
               if (isPlayerTurn && activeHero != null)
