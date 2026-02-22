@@ -48,6 +48,13 @@ class BattleAnimationController extends ChangeNotifier {
   final List<VfxCommand> _activeCommands = [];
   bool _disposed = false;
 
+  /// Speed multiplier applied to all animation durations.
+  /// 1.0 = normal, 0.5 = 2x speed, 0.33 = 3x speed.
+  double speedMultiplier = 1.0;
+
+  Duration _scaled(Duration d) =>
+      Duration(milliseconds: (d.inMilliseconds * speedMultiplier).round());
+
   List<VfxCommand> get activeCommands => List.unmodifiable(_activeCommands);
 
   bool hasCommandForTarget(String targetId, VfxType type) {
@@ -73,12 +80,12 @@ class BattleAnimationController extends ChangeNotifier {
     for (final cmd in commands) {
       if (_disposed) return;
 
-      Future.delayed(cmd.startDelay, () {
+      Future.delayed(_scaled(cmd.startDelay), () {
         if (_disposed) return;
         _activeCommands.add(cmd);
         notifyListeners();
 
-        Future.delayed(cmd.duration, () {
+        Future.delayed(_scaled(cmd.duration), () {
           if (_disposed) return;
           _activeCommands.remove(cmd);
           notifyListeners();
@@ -86,7 +93,7 @@ class BattleAnimationController extends ChangeNotifier {
       });
     }
 
-    await Future.delayed(totalDuration);
+    await Future.delayed(_scaled(totalDuration));
   }
 
   void clear() {

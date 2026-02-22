@@ -167,10 +167,13 @@ class ActionMenuState extends State<ActionMenu> {
         children: [
           ...heroSkills.map((skill) {
             final hasEnoughMp = widget.activeHero.currentMp >= skill.mpCost;
+            final elemLabel = skill.element != SkillElement.none
+                ? ' [${skill.element.name.toUpperCase()}]'
+                : '';
             return Padding(
               padding: const EdgeInsets.only(bottom: 6),
               child: RpgButton(
-                label: '${skill.name} (${skill.mpCost} MP)',
+                label: '${skill.name}$elemLabel (${skill.mpCost} MP)',
                 icon: skill.type == SkillType.healing
                     ? Icons.healing
                     : skill.type == SkillType.magical

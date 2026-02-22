@@ -1,3 +1,4 @@
+import 'skill.dart' show SkillElement;
 import 'stats.dart';
 import 'status_effect.dart';
 
@@ -14,6 +15,8 @@ class Enemy {
   final int goldReward;
   final String spriteColor;
   final List<StatusEffect> statusEffects;
+  final List<SkillElement> weaknesses;
+  final List<SkillElement> resistances;
 
   const Enemy({
     required this.id,
@@ -26,6 +29,8 @@ class Enemy {
     required this.goldReward,
     required this.spriteColor,
     this.statusEffects = const [],
+    this.weaknesses = const [],
+    this.resistances = const [],
   });
 
   bool get isAlive => currentHp > 0;
@@ -42,6 +47,8 @@ class Enemy {
     int? goldReward,
     String? spriteColor,
     List<StatusEffect>? statusEffects,
+    List<SkillElement>? weaknesses,
+    List<SkillElement>? resistances,
   }) {
     return Enemy(
       id: id ?? this.id,
@@ -54,6 +61,8 @@ class Enemy {
       goldReward: goldReward ?? this.goldReward,
       spriteColor: spriteColor ?? this.spriteColor,
       statusEffects: statusEffects ?? this.statusEffects,
+      weaknesses: weaknesses ?? this.weaknesses,
+      resistances: resistances ?? this.resistances,
     );
   }
 
@@ -71,6 +80,14 @@ class Enemy {
       xpReward: json['xpReward'] as int,
       goldReward: json['goldReward'] as int,
       spriteColor: json['spriteColor'] as String? ?? '0xFF4CAF50',
+      weaknesses: (json['weaknesses'] as List<dynamic>?)
+              ?.map((e) => SkillElement.values.firstWhere((el) => el.name == e))
+              .toList() ??
+          const [],
+      resistances: (json['resistances'] as List<dynamic>?)
+              ?.map((e) => SkillElement.values.firstWhere((el) => el.name == e))
+              .toList() ??
+          const [],
     );
   }
 }

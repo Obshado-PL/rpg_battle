@@ -15,7 +15,9 @@
     "skillIds": [],
     "xpReward": 15,
     "goldReward": 8,
-    "spriteColor": "0xFF4CAF50"
+    "spriteColor": "0xFF4CAF50",
+    "weaknesses": ["fire"],
+    "resistances": []
   },
   {
     "id": "goblin",
@@ -33,7 +35,9 @@
     "skillIds": ["enemy_bite"],
     "xpReward": 25,
     "goldReward": 15,
-    "spriteColor": "0xFF8BC34A"
+    "spriteColor": "0xFF8BC34A",
+    "weaknesses": ["fire"],
+    "resistances": []
   },
   {
     "id": "skeleton",
@@ -51,7 +55,9 @@
     "skillIds": ["enemy_dark_slash"],
     "xpReward": 35,
     "goldReward": 20,
-    "spriteColor": "0xFFBDBDBD"
+    "spriteColor": "0xFFBDBDBD",
+    "weaknesses": ["holy"],
+    "resistances": ["dark"]
   },
   {
     "id": "wolf",
@@ -69,7 +75,9 @@
     "skillIds": ["enemy_bite"],
     "xpReward": 30,
     "goldReward": 12,
-    "spriteColor": "0xFF795548"
+    "spriteColor": "0xFF795548",
+    "weaknesses": ["fire"],
+    "resistances": []
   },
   {
     "id": "dark_mage",
@@ -87,7 +95,9 @@
     "skillIds": ["enemy_fire_breath"],
     "xpReward": 45,
     "goldReward": 30,
-    "spriteColor": "0xFF9C27B0"
+    "spriteColor": "0xFF9C27B0",
+    "weaknesses": ["holy"],
+    "resistances": ["dark"]
   },
   {
     "id": "orc",
@@ -105,7 +115,9 @@
     "skillIds": ["enemy_dark_slash"],
     "xpReward": 50,
     "goldReward": 35,
-    "spriteColor": "0xFF4E342E"
+    "spriteColor": "0xFF4E342E",
+    "weaknesses": ["lightning"],
+    "resistances": []
   },
   {
     "id": "dragon",
@@ -123,7 +135,9 @@
     "skillIds": ["enemy_fire_breath", "enemy_tail_sweep"],
     "xpReward": 200,
     "goldReward": 150,
-    "spriteColor": "0xFFC62828"
+    "spriteColor": "0xFFC62828",
+    "weaknesses": ["ice"],
+    "resistances": ["fire"]
   },
   {
     "id": "bandit",
@@ -141,7 +155,9 @@
     "skillIds": ["enemy_bite"],
     "xpReward": 40,
     "goldReward": 40,
-    "spriteColor": "0xFF6D4C41"
+    "spriteColor": "0xFF6D4C41",
+    "weaknesses": [],
+    "resistances": []
   },
   {
     "id": "ghost",
@@ -159,7 +175,9 @@
     "skillIds": ["enemy_ghost_drain"],
     "xpReward": 50,
     "goldReward": 25,
-    "spriteColor": "0xFF90CAF9"
+    "spriteColor": "0xFF90CAF9",
+    "weaknesses": ["holy"],
+    "resistances": ["dark", "ice"]
   },
   {
     "id": "golem",
@@ -177,7 +195,9 @@
     "skillIds": ["enemy_golem_slam"],
     "xpReward": 65,
     "goldReward": 45,
-    "spriteColor": "0xFF78909C"
+    "spriteColor": "0xFF78909C",
+    "weaknesses": ["ice", "lightning"],
+    "resistances": ["fire"]
   },
   {
     "id": "ice_elemental",
@@ -195,7 +215,9 @@
     "skillIds": ["enemy_ice_blast"],
     "xpReward": 60,
     "goldReward": 35,
-    "spriteColor": "0xFF4DD0E1"
+    "spriteColor": "0xFF4DD0E1",
+    "weaknesses": ["fire", "lightning"],
+    "resistances": ["ice"]
   },
   {
     "id": "necromancer",
@@ -213,6 +235,8 @@
     "skillIds": ["enemy_dark_bolt", "enemy_ghost_drain"],
     "xpReward": 180,
     "goldReward": 120,
-    "spriteColor": "0xFF4A148C"
+    "spriteColor": "0xFF4A148C",
+    "weaknesses": ["holy", "fire"],
+    "resistances": ["dark"]
   }
 ]

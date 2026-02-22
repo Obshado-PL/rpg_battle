@@ -253,6 +253,12 @@ final goldProvider = StateProvider<int>((ref) => 100);
 /// Encounters cleared tracker.
 final clearedEncountersProvider = StateProvider<Set<String>>((ref) => {});
 
+/// Battle speed multiplier: 1.0 = normal, 0.5 = 2x, 0.33 = 3x.
+final battleSpeedProvider = StateProvider<double>((ref) => 1.0);
+
+/// Auto-battle toggle.
+final autoBattleProvider = StateProvider<bool>((ref) => false);
+
 /// Battle state management.
 final battleProvider =
     StateNotifierProvider<BattleNotifier, BattleState>((ref) {
@@ -279,6 +285,12 @@ class BattleNotifier extends StateNotifier<BattleState> {
   /// Set by BattleScreen to play animations before state commits.
   Future<void> Function(List<BattleAnimationEvent>)? onPlayAnimations;
 
+  /// Speed multiplier: 1.0 = normal, 0.5 = 2x, 0.33 = 3x.
+  double speedMultiplier = 1.0;
+
+  Duration _scaled(Duration d) =>
+      Duration(milliseconds: (d.inMilliseconds * speedMultiplier).round());
+
   BattleNotifier({
     required this.engine,
     required this.gameData,
@@ -302,7 +314,7 @@ class BattleNotifier extends StateNotifier<BattleState> {
     );
 
     // Start first round after a brief delay
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(_scaled(const Duration(milliseconds: 500)), () {
       if (mounted) {
         state = engine.startRound(state);
       }
@@ -312,7 +324,7 @@ class BattleNotifier extends StateNotifier<BattleState> {
   Future<void> submitPlayerAction(BattleAction action) async {
     state = state.copyWith(phase: BattlePhase.actionExecution);
 
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future.delayed(_scaled(const Duration(milliseconds: 200)));
 
     final result = engine.executeAction(state, action);
 
@@ -325,7 +337,7 @@ class BattleNotifier extends StateNotifier<BattleState> {
 
     if (state.isBattleOver) return;
 
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future.delayed(_scaled(const Duration(milliseconds: 400)));
     state = engine.advanceTurn(state);
 
     // Auto-execute enemy turns
@@ -336,7 +348,7 @@ class BattleNotifier extends StateNotifier<BattleState> {
 
   Future<void> _executeEnemyTurns() async {
     while (mounted && state.phase == BattlePhase.enemyTurn) {
-      await Future.delayed(const Duration(milliseconds: 600));
+      await Future.delayed(_scaled(const Duration(milliseconds: 600)));
 
       final enemyAction = engine.getEnemyAction(state);
       final result = engine.executeAction(state, enemyAction);
@@ -350,7 +362,7 @@ class BattleNotifier extends StateNotifier<BattleState> {
 
       if (state.isBattleOver) return;
 
-      await Future.delayed(const Duration(milliseconds: 400));
+      await Future.delayed(_scaled(const Duration(milliseconds: 400)));
       state = engine.advanceTurn(state);
     }
   }

@@ -348,17 +348,24 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
       ];
     }
 
+    final currentStats =
+        EquipmentSystem.computeEffectiveStats(hero, gameData.equipment);
+
     return available.map((eq) {
-      final bonuses = <String>[];
-      final s = eq.statBonuses;
-      if (s.attack > 0) bonuses.add('ATK+${s.attack}');
-      if (s.defense > 0) bonuses.add('DEF+${s.defense}');
-      if (s.magicAttack > 0) bonuses.add('MAG+${s.magicAttack}');
-      if (s.magicDefense > 0) bonuses.add('MDF+${s.magicDefense}');
-      if (s.speed > 0) bonuses.add('SPD+${s.speed}');
-      if (s.speed < 0) bonuses.add('SPD${s.speed}');
-      if (s.maxHp > 0) bonuses.add('HP+${s.maxHp}');
-      if (s.maxMp > 0) bonuses.add('MP+${s.maxMp}');
+      final hypothetical =
+          EquipmentSystem.computeStatsWithSwap(hero, gameData.equipment, eq);
+
+      Widget diffChip(String label, int curr, int hyp) {
+        final d = hyp - curr;
+        if (d == 0) return const SizedBox.shrink();
+        return Text(
+          '$label${d > 0 ? "+$d" : "$d"}',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: d > 0 ? Colors.greenAccent : Colors.redAccent,
+            fontSize: 6,
+          ),
+        );
+      }
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 4),
@@ -383,9 +390,18 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                       Text(eq.name,
                           style: theme.textTheme.bodySmall
                               ?.copyWith(color: Colors.white, fontSize: 8)),
-                      Text(bonuses.join('  '),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.greenAccent, fontSize: 6)),
+                      Wrap(
+                        spacing: 6,
+                        children: [
+                          diffChip('HP', currentStats.maxHp, hypothetical.maxHp),
+                          diffChip('MP', currentStats.maxMp, hypothetical.maxMp),
+                          diffChip('ATK', currentStats.attack, hypothetical.attack),
+                          diffChip('DEF', currentStats.defense, hypothetical.defense),
+                          diffChip('MAG', currentStats.magicAttack, hypothetical.magicAttack),
+                          diffChip('MDF', currentStats.magicDefense, hypothetical.magicDefense),
+                          diffChip('SPD', currentStats.speed, hypothetical.speed),
+                        ],
+                      ),
                     ],
                   ),
                 ),

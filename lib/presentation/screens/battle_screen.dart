@@ -17,6 +17,7 @@ import '../widgets/battle/action_menu.dart';
 import '../widgets/battle/battle_log.dart';
 import '../widgets/battle/enemy_formation.dart';
 import '../widgets/battle/party_status_bar.dart';
+import '../widgets/battle/battle_results_dialog.dart';
 import '../widgets/battle/turn_order_bar.dart';
 
 class BattleScreen extends ConsumerStatefulWidget {
@@ -33,6 +34,7 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
   final _actionMenuKey = GlobalKey<ActionMenuState>();
   MenuState _currentMenuState = MenuState.main;
   bool _battleStarted = false;
+  bool _autoBattlePending = false;
 
   // Animation system
   late BattleAnimationController _animController;
@@ -98,6 +100,11 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
     // Wire up animation callback
     notifier.onPlayAnimations = _playAnimations;
 
+    // Sync speed multiplier
+    final speed = ref.read(battleSpeedProvider);
+    notifier.speedMultiplier = speed;
+    _animController.speedMultiplier = speed;
+
     notifier.startBattle(
       encounter: widget.encounter,
       party: party,
@@ -105,6 +112,65 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
       difficulty: difficulty,
     );
     setState(() => _battleStarted = true);
+  }
+
+  void _cycleSpeed() {
+    final current = ref.read(battleSpeedProvider);
+    final next = switch (current) {
+      1.0 => 0.5,
+      0.5 => 0.33,
+      _ => 1.0,
+    };
+    ref.read(battleSpeedProvider.notifier).state = next;
+    ref.read(battleProvider.notifier).speedMultiplier = next;
+    _animController.speedMultiplier = next;
+  }
+
+  String _speedLabel(double speed) {
+    return switch (speed) {
+      0.5 => '2x',
+      0.33 => '3x',
+      _ => '1x',
+    };
+  }
+
+  void _toggleAutoBattle() {
+    final current = ref.read(autoBattleProvider);
+    ref.read(autoBattleProvider.notifier).state = !current;
+    if (!current) {
+      // Just turned on — trigger if it's already player turn
+      _tryAutoBattle();
+    }
+  }
+
+  void _tryAutoBattle() {
+    if (_autoBattlePending) return;
+    final autoBattle = ref.read(autoBattleProvider);
+    if (!autoBattle) return;
+
+    final battleState = ref.read(battleProvider);
+    if (battleState.phase != BattlePhase.playerInput) return;
+
+    final hero = battleState.currentHero;
+    if (hero == null) return;
+
+    // Find first alive enemy
+    final target = battleState.enemies.where((e) => e.isAlive).firstOrNull;
+    if (target == null) return;
+
+    _autoBattlePending = true;
+    // Small delay so UI renders before action fires
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _autoBattlePending = false;
+      if (!mounted) return;
+      final action = BattleAction(
+        actorId: hero.id,
+        isHero: true,
+        actionType: ActionType.attack,
+        targetId: target.id,
+      );
+      _onActionSelected(action);
+    });
   }
 
   Future<void> _playAnimations(List<BattleAnimationEvent> events) async {
@@ -173,7 +239,7 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
     // Ensure target keys exist for all actors
     _initTargetKeys(battleState);
 
-    // Listen for battle end
+    // Listen for battle end and auto-battle trigger
     ref.listen<BattleState>(battleProvider, (prev, next) {
       if (next.phase == BattlePhase.victory) {
         _showVictoryDialog(next);
@@ -181,6 +247,8 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
         _showDefeatDialog();
       } else if (next.phase == BattlePhase.fled) {
         _showFledDialog();
+      } else if (next.phase == BattlePhase.playerInput) {
+        _tryAutoBattle();
       }
     });
 
@@ -225,6 +293,8 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
   Widget _buildBattleUI(BattleState battleState, GameData gameData) {
     final isPlayerTurn = battleState.phase == BattlePhase.playerInput;
     final activeHero = battleState.currentHero;
+    final speed = ref.watch(battleSpeedProvider);
+    final autoBattle = ref.watch(autoBattleProvider);
 
     return Stack(
       children: [
@@ -247,31 +317,92 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
                 enemies: battleState.enemies,
               ),
 
-              // Round indicator
+              // Round indicator + speed/auto controls
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       'Round ${battleState.roundNumber}',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
+                    const SizedBox(width: 8),
                     if (isPlayerTurn && activeHero != null)
-                      Text(
-                        '${activeHero.name}\'s turn',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.yellow,
-                            ),
+                      Expanded(
+                        child: Text(
+                          '${activeHero.name}\'s turn',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.yellow,
+                              ),
+                        ),
                       ),
                     if (!isPlayerTurn && !battleState.isBattleOver)
-                      Text(
-                        'Enemy turn...',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.red[300],
-                            ),
+                      Expanded(
+                        child: Text(
+                          'Enemy turn...',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.red[300],
+                              ),
+                        ),
                       ),
+                    if (isPlayerTurn || battleState.isBattleOver)
+                      const Spacer(),
+                    // Speed toggle
+                    GestureDetector(
+                      onTap: _cycleSpeed,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: speed < 1.0
+                              ? Colors.orange.withValues(alpha: 0.2)
+                              : Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: speed < 1.0
+                                ? Colors.orange.withValues(alpha: 0.5)
+                                : Colors.white.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Text(
+                          _speedLabel(speed),
+                          style: TextStyle(
+                            color: speed < 1.0 ? Colors.orange : Colors.white54,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    // Auto-battle toggle
+                    GestureDetector(
+                      onTap: _toggleAutoBattle,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: autoBattle
+                              ? Colors.cyan.withValues(alpha: 0.2)
+                              : Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: autoBattle
+                                ? Colors.cyan.withValues(alpha: 0.5)
+                                : Colors.white.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Text(
+                          'AUTO',
+                          style: TextStyle(
+                            color: autoBattle ? Colors.cyan : Colors.white54,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -408,135 +539,21 @@ class _BattleScreenState extends ConsumerState<BattleScreen>
     // Auto-save after victory
     collectAndSave(ref);
 
-    showDialog(
+    showGeneralDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text(
-          'VICTORY!',
-          style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.emoji_events, size: 48, color: Colors.amber),
-            const SizedBox(height: 16),
-            Text(
-              'XP gained: ${result.totalXp}',
-              style: const TextStyle(color: Colors.white),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Gold gained: ${result.totalGold}',
-              style: const TextStyle(color: Colors.amber),
-            ),
-            const SizedBox(height: 12),
-            ...updatedParty.map((hero) {
-              final oldHero =
-                  currentParty.firstWhere((h) => h.id == hero.id);
-              final leveledUp = hero.level > oldHero.level;
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      hero.name,
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                    if (leveledUp) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        'LEVEL UP! Lv.${hero.level}',
-                        style: const TextStyle(
-                          color: Colors.yellow,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              );
-            }),
-            // Loot drops
-            if (!lootResult.isEmpty) ...[
-              const SizedBox(height: 12),
-              const Divider(color: Colors.white24),
-              const SizedBox(height: 8),
-              const Text(
-                'Loot Drops',
-                style: TextStyle(
-                  color: Colors.tealAccent,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 6),
-              ...lootResult.items.map((loot) {
-                final item = gameData.items[loot.itemId];
-                final name = item?.name ?? loot.itemId;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 1),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.inventory_2,
-                          size: 14, color: Colors.tealAccent),
-                      const SizedBox(width: 6),
-                      Text(
-                        '$name x${loot.quantity}',
-                        style: const TextStyle(color: Colors.white70),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-              ...lootResult.equipmentIds.map((eqId) {
-                final eq = gameData.equipment[eqId];
-                final name = eq?.name ?? eqId;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 1),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.shield,
-                          size: 14, color: Colors.orangeAccent),
-                      const SizedBox(width: 6),
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          color: Colors.orangeAccent,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Text(
-                        'NEW!',
-                        style: TextStyle(
-                          color: Colors.yellow,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              _showPostBattleDialogue();
-            },
-            child:
-                const Text('Continue', style: TextStyle(color: Colors.amber)),
-          ),
-        ],
+      barrierColor: Colors.black54,
+      pageBuilder: (ctx, anim1, anim2) => BattleResultsDialog(
+        xpGained: result.totalXp,
+        goldGained: result.totalGold,
+        updatedParty: updatedParty,
+        previousParty: currentParty,
+        lootResult: lootResult,
+        gameData: gameData,
+        onContinue: () {
+          Navigator.of(ctx).pop();
+          _showPostBattleDialogue();
+        },
       ),
     );
   }

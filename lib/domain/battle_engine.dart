@@ -617,6 +617,9 @@ class BattleEngine {
             magicAttackStat: heroStats.magicAttack,
             magicDefenseStat: enemyStats.magicDefense,
             skillPower: skill.power,
+            skillElement: skill.element,
+            targetWeaknesses: enemy.weaknesses,
+            targetResistances: enemy.resistances,
           );
         } else {
           dmg = _damageCalculator.calculatePhysicalDamage(
@@ -624,6 +627,9 @@ class BattleEngine {
             defenseStat: enemyStats.defense,
             skillPower: skill.power,
             accuracy: skill.accuracy,
+            skillElement: skill.element,
+            targetWeaknesses: enemy.weaknesses,
+            targetResistances: enemy.resistances,
           );
         }
 
@@ -631,7 +637,12 @@ class BattleEngine {
           final newHp =
               (enemy.currentHp - dmg.damage).clamp(0, enemy.stats.maxHp);
           updatedEnemies[i] = enemy.copyWith(currentHp: newHp);
-          messages.add('${enemy.name} takes ${dmg.damage} damage!');
+          final elemText = dmg.elementalMultiplier > 1.0
+              ? ' Super effective!'
+              : dmg.elementalMultiplier < 1.0
+                  ? ' Not very effective...'
+                  : '';
+          messages.add('${enemy.name} takes ${dmg.damage} damage!$elemText');
 
           animations.add(BattleAnimationEvent(
             type: 'damage',
@@ -755,6 +766,9 @@ class BattleEngine {
           magicAttackStat: heroStats.magicAttack,
           magicDefenseStat: enemyStats.magicDefense,
           skillPower: skill.power,
+          skillElement: skill.element,
+          targetWeaknesses: enemy.weaknesses,
+          targetResistances: enemy.resistances,
         );
       } else {
         dmg = _damageCalculator.calculatePhysicalDamage(
@@ -762,6 +776,9 @@ class BattleEngine {
           defenseStat: enemyStats.defense,
           skillPower: skill.power,
           accuracy: skill.accuracy,
+          skillElement: skill.element,
+          targetWeaknesses: enemy.weaknesses,
+          targetResistances: enemy.resistances,
         );
       }
 
@@ -781,8 +798,13 @@ class BattleEngine {
         }).toList();
 
         final critText = dmg.isCritical ? ' Critical hit!' : '';
+        final elemText = dmg.elementalMultiplier > 1.0
+            ? ' Super effective!'
+            : dmg.elementalMultiplier < 1.0
+                ? ' Not very effective...'
+                : '';
         messages.add(
-            '$actorName uses ${skill.name} on ${enemy.name} for ${dmg.damage} damage!$critText');
+            '$actorName uses ${skill.name} on ${enemy.name} for ${dmg.damage} damage!$critText$elemText');
 
         animations.add(BattleAnimationEvent(
           type: 'skill',

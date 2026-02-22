@@ -109,6 +109,7 @@
     "power": 18,
     "animationKey": "fire",
     "accuracy": 1.0,
+    "element": "fire",
     "appliesEffect": "burn",
     "effectDuration": 2,
     "effectValue": 8,
@@ -123,7 +124,8 @@
     "mpCost": 20,
     "power": 14,
     "animationKey": "ice",
-    "accuracy": 1.0
+    "accuracy": 1.0,
+    "element": "ice"
   },
   {
     "id": "mage_lightning",
@@ -134,7 +136,8 @@
     "mpCost": 14,
     "power": 26,
     "animationKey": "lightning",
-    "accuracy": 1.0
+    "accuracy": 1.0,
+    "element": "lightning"
   },
   {
     "id": "mage_flame_wall",
@@ -146,6 +149,7 @@
     "power": 12,
     "animationKey": "fire",
     "accuracy": 1.0,
+    "element": "fire",
     "appliesEffect": "burn",
     "effectDuration": 2,
     "effectValue": 8,
@@ -160,7 +164,8 @@
     "mpCost": 24,
     "power": 18,
     "animationKey": "ice",
-    "accuracy": 1.0
+    "accuracy": 1.0,
+    "element": "ice"
   },
   {
     "id": "mage_arcane_shield",
@@ -186,7 +191,8 @@
     "mpCost": 28,
     "power": 35,
     "animationKey": "fire",
-    "accuracy": 1.0
+    "accuracy": 1.0,
+    "element": "fire"
   },
   {
     "id": "mage_time_stop",
@@ -198,6 +204,7 @@
     "power": 8,
     "animationKey": "ice",
     "accuracy": 1.0,
+    "element": "ice",
     "appliesEffect": "stun",
     "effectDuration": 2,
     "effectValue": 0,
@@ -260,7 +267,8 @@
     "mpCost": 14,
     "power": 22,
     "animationKey": "heal",
-    "accuracy": 1.0
+    "accuracy": 1.0,
+    "element": "holy"
   },
   {
     "id": "healer_divine_shield",
@@ -334,7 +342,8 @@
     "mpCost": 14,
     "power": 24,
     "animationKey": "dark",
-    "accuracy": 0.92
+    "accuracy": 0.92,
+    "element": "dark"
   },
   {
     "id": "rogue_smoke_bomb",
@@ -383,6 +392,7 @@
     "power": 14,
     "animationKey": "dark",
     "accuracy": 0.95,
+    "element": "dark",
     "appliesEffect": "poison",
     "effectDuration": 3,
     "effectValue": 12,
@@ -423,7 +433,8 @@
     "mpCost": 0,
     "power": 16,
     "animationKey": "fire",
-    "accuracy": 1.0
+    "accuracy": 1.0,
+    "element": "fire"
   },
   {
     "id": "enemy_dark_slash",
@@ -434,7 +445,8 @@
     "mpCost": 0,
     "power": 14,
     "animationKey": "slash",
-    "accuracy": 0.95
+    "accuracy": 0.95,
+    "element": "dark"
   },
   {
     "id": "enemy_tail_sweep",
@@ -457,6 +469,7 @@
     "power": 18,
     "animationKey": "drain",
     "accuracy": 1.0,
+    "element": "dark",
     "appliesEffect": "atkDown",
     "effectDuration": 2,
     "effectValue": 20,
@@ -483,6 +496,7 @@
     "power": 14,
     "animationKey": "ice",
     "accuracy": 1.0,
+    "element": "ice",
     "appliesEffect": "stun",
     "effectDuration": 1,
     "effectValue": 0,
@@ -497,6 +511,7 @@
     "mpCost": 0,
     "power": 22,
     "animationKey": "dark",
-    "accuracy": 1.0
+    "accuracy": 1.0,
+    "element": "dark"
   }
 ]

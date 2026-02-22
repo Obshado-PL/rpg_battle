@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/enemy.dart';
+import '../../../data/models/skill.dart' show SkillElement;
 import '../../../data/models/status_effect.dart';
 import '../../animation/battle_animation_controller.dart';
 import '../common/hp_bar.dart';
@@ -256,6 +257,18 @@ class _EnemySpriteState extends State<EnemySprite>
           width: 60,
           child: HpBar(percent: enemy.hpPercent, height: 4),
         ),
+        // Weakness icons
+        if (enemy.weaknesses.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Wrap(
+              spacing: 1,
+              children: enemy.weaknesses.map((e) {
+                final (icon, color) = _elementIcon(e);
+                return Icon(icon, size: 9, color: color);
+              }).toList(),
+            ),
+          ),
         // Status effect icons
         if (enemy.statusEffects.isNotEmpty)
           Padding(
@@ -281,6 +294,17 @@ class _EnemySpriteState extends State<EnemySprite>
       StatusEffectType.atkDown => (Icons.arrow_downward, Colors.red),
       StatusEffectType.defUp => (Icons.arrow_upward, Colors.blue),
       StatusEffectType.defDown => (Icons.arrow_downward, Colors.blue),
+    };
+  }
+
+  static (IconData, Color) _elementIcon(SkillElement element) {
+    return switch (element) {
+      SkillElement.fire => (Icons.local_fire_department, Colors.deepOrange),
+      SkillElement.ice => (Icons.ac_unit, Colors.lightBlue),
+      SkillElement.lightning => (Icons.flash_on, Colors.amber),
+      SkillElement.dark => (Icons.dark_mode, Colors.purple),
+      SkillElement.holy => (Icons.light_mode, Colors.yellow),
+      SkillElement.none => (Icons.circle, Colors.grey),
     };
   }
 

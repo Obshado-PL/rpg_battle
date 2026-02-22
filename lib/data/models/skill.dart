@@ -4,6 +4,8 @@ enum SkillType { physical, magical, healing }
 
 enum TargetType { singleEnemy, allEnemies, singleAlly, allAllies, self_ }
 
+enum SkillElement { fire, ice, lightning, dark, holy, none }
+
 class Skill {
   final String id;
   final String name;
@@ -18,6 +20,7 @@ class Skill {
   final int effectDuration;
   final int effectValue;
   final double effectChance;
+  final SkillElement element;
 
   const Skill({
     required this.id,
@@ -33,6 +36,7 @@ class Skill {
     this.effectDuration = 3,
     this.effectValue = 0,
     this.effectChance = 1.0,
+    this.element = SkillElement.none,
   });
 
   factory Skill.fromJson(Map<String, dynamic> json) {
@@ -57,6 +61,9 @@ class Skill {
       effectDuration: json['effectDuration'] as int? ?? 3,
       effectValue: json['effectValue'] as int? ?? 0,
       effectChance: (json['effectChance'] as num?)?.toDouble() ?? 1.0,
+      element: json['element'] != null
+          ? SkillElement.values.firstWhere((e) => e.name == json['element'])
+          : SkillElement.none,
     );
   }
 

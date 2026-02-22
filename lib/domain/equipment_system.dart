@@ -30,4 +30,24 @@ class EquipmentSystem {
       speed: base.speed + bonuses.fold(0, (sum, b) => sum + b.speed),
     );
   }
+
+  /// Compute effective stats if the character were to equip a candidate item.
+  static Stats computeStatsWithSwap(
+    Character character,
+    Map<String, Equipment> equipmentData,
+    Equipment candidate,
+  ) {
+    final swapped = switch (candidate.slotType) {
+      EquipmentSlotType.weapon =>
+        character.copyWith(weaponId: candidate.id),
+      EquipmentSlotType.armor =>
+        character.copyWith(armorId: candidate.id),
+      EquipmentSlotType.accessory =>
+        character.copyWith(accessoryId: candidate.id),
+    };
+    return computeEffectiveStats(
+      swapped,
+      {...equipmentData, candidate.id: candidate},
+    );
+  }
 }
