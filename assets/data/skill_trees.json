@@ -11,17 +11,6 @@
     ]
   },
   {
-    "heroClass": "mage",
-    "nodes": [
-      {"skillId": "mage_lightning", "tier": 1, "choice": 0, "levelRequired": 3},
-      {"skillId": "mage_flame_wall", "tier": 1, "choice": 1, "levelRequired": 3},
-      {"skillId": "mage_blizzard", "tier": 2, "choice": 0, "levelRequired": 5},
-      {"skillId": "mage_arcane_shield", "tier": 2, "choice": 1, "levelRequired": 5},
-      {"skillId": "mage_meteor", "tier": 3, "choice": 0, "levelRequired": 7},
-      {"skillId": "mage_time_stop", "tier": 3, "choice": 1, "levelRequired": 7}
-    ]
-  },
-  {
     "heroClass": "healer",
     "nodes": [
       {"skillId": "healer_group_heal", "tier": 1, "choice": 0, "levelRequired": 3},
@@ -30,17 +19,6 @@
       {"skillId": "healer_divine_shield", "tier": 2, "choice": 1, "levelRequired": 5},
       {"skillId": "healer_resurrection", "tier": 3, "choice": 0, "levelRequired": 7},
       {"skillId": "healer_cleanse", "tier": 3, "choice": 1, "levelRequired": 7}
-    ]
-  },
-  {
-    "heroClass": "rogue",
-    "nodes": [
-      {"skillId": "rogue_shadowstrike", "tier": 1, "choice": 0, "levelRequired": 3},
-      {"skillId": "rogue_smoke_bomb", "tier": 1, "choice": 1, "levelRequired": 3},
-      {"skillId": "rogue_assassinate", "tier": 2, "choice": 0, "levelRequired": 5},
-      {"skillId": "rogue_dual_strike", "tier": 2, "choice": 1, "levelRequired": 5},
-      {"skillId": "rogue_death_mark", "tier": 3, "choice": 0, "levelRequired": 7},
-      {"skillId": "rogue_phantom_dance", "tier": 3, "choice": 1, "levelRequired": 7}
     ]
   }
 ]

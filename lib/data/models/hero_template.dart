@@ -1,7 +1,7 @@
 import 'character.dart';
 import 'stats.dart';
 
-enum HeroRarity { common, rare, epic }
+enum HeroRarity { common, rare, epic, legendary }
 
 class HeroTemplate {
   final String id;

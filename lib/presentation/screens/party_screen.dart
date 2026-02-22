@@ -306,6 +306,7 @@ class PartyScreen extends ConsumerWidget {
         hero.baseStats.magicDefense +
         hero.baseStats.speed;
 
+    if (total > 400) return Colors.redAccent; // legendary
     if (total > 350) return Colors.amber; // epic
     if (total > 280) return Colors.blue; // rare
     return Colors.white54; // common

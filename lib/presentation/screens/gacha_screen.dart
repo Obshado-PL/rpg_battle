@@ -487,6 +487,7 @@ class _GachaScreenState extends ConsumerState<GachaScreen>
       HeroRarity.common => ('Common', Colors.white54),
       HeroRarity.rare => ('Rare', Colors.blue),
       HeroRarity.epic => ('Epic', Colors.amber),
+      HeroRarity.legendary => ('Legendary', Colors.redAccent),
     };
 
     return Container(
@@ -508,6 +509,7 @@ class _GachaScreenState extends ConsumerState<GachaScreen>
       HeroRarity.common => Colors.white54,
       HeroRarity.rare => Colors.blue,
       HeroRarity.epic => Colors.amber,
+      HeroRarity.legendary => Colors.redAccent,
     };
   }
 

@@ -19,15 +19,17 @@ class GachaSystem {
   static const int multiPullCost = 2700; // 10-pull discount
 
   // Rarity rates
-  static const double _commonRate = 0.60;
+  static const double _commonRate = 0.50;
   static const double _rareRate = 0.30;
-  // epic = 0.10 (remainder)
+  static const double _epicRate = 0.15;
+  // legendary = 0.05 (remainder)
 
   // Duplicate compensation
   static const Map<HeroRarity, int> _compensation = {
     HeroRarity.common: 150,
     HeroRarity.rare: 300,
     HeroRarity.epic: 600,
+    HeroRarity.legendary: 1200,
   };
 
   final Random _random;
@@ -45,8 +47,10 @@ class GachaSystem {
       targetRarity = HeroRarity.common;
     } else if (roll < _commonRate + _rareRate) {
       targetRarity = HeroRarity.rare;
-    } else {
+    } else if (roll < _commonRate + _rareRate + _epicRate) {
       targetRarity = HeroRarity.epic;
+    } else {
+      targetRarity = HeroRarity.legendary;
     }
 
     // Get all non-starter heroes of this rarity
