@@ -6,6 +6,7 @@ import '../../data/models/skill.dart';
 import '../../data/models/skill_tree.dart';
 import '../../domain/skill_tree_system.dart';
 import '../providers/game_providers.dart';
+import '../widgets/common/hero_portrait.dart';
 
 class SkillTreeScreen extends ConsumerWidget {
   const SkillTreeScreen({super.key});
@@ -67,8 +68,7 @@ class SkillTreeScreen extends ConsumerWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(_classIcon(hero.heroClass),
-                              size: 16, color: color),
+                          HeroPortrait(spriteId: hero.spriteId, size: 20),
                           const SizedBox(width: 6),
                           Text(
                             '${hero.name} Lv.${hero.level}',
@@ -103,12 +103,6 @@ class SkillTreeScreen extends ConsumerWidget {
         HeroClass.rogue => Colors.amber,
       };
 
-  static IconData _classIcon(HeroClass heroClass) => switch (heroClass) {
-        HeroClass.warrior => Icons.security,
-        HeroClass.mage => Icons.auto_fix_high,
-        HeroClass.healer => Icons.favorite,
-        HeroClass.rogue => Icons.flash_on,
-      };
 }
 
 class _HeroSkillTree extends ConsumerWidget {
@@ -215,7 +209,7 @@ class _HeroSkillTree extends ConsumerWidget {
     required SkillTreeSystem skillTreeSystem,
   }) {
     final tierNodes = tree.nodesForTier(tier);
-    final key = '${hero.heroClass.name}_tier$tier';
+    final key = '${hero.id}_tier$tier';
     final chosenSkillId = choices[key];
     final canChoose = skillTreeSystem.canChoose(
       hero: hero,
@@ -436,7 +430,7 @@ class _HeroSkillTree extends ConsumerWidget {
   }
 
   void _applyChoice(WidgetRef ref, String skillId, int tier) {
-    final key = '${hero.heroClass.name}_tier$tier';
+    final key = '${hero.id}_tier$tier';
 
     // Update skill tree choices
     ref.read(skillTreeChoicesProvider.notifier).choose(key, skillId);

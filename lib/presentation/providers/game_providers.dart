@@ -91,11 +91,55 @@ class SkillTreeChoicesNotifier extends StateNotifier<Map<String, String>> {
   void reset() => state = {};
 }
 
+/// Set of hero IDs the player owns (starters + gacha pulls).
+final ownedHeroIdsProvider =
+    StateNotifierProvider<OwnedHeroIdsNotifier, Set<String>>((ref) {
+  return OwnedHeroIdsNotifier();
+});
+
+class OwnedHeroIdsNotifier extends StateNotifier<Set<String>> {
+  OwnedHeroIdsNotifier()
+      : super(GameData.starterHeroIds.toSet());
+
+  OwnedHeroIdsNotifier.fromSet(super.saved);
+
+  void add(String heroId) => state = {...state, heroId};
+
+  void reset() => state = GameData.starterHeroIds.toSet();
+}
+
+/// Bench roster: owned heroes NOT in the active party.
+final rosterProvider =
+    StateNotifierProvider<RosterNotifier, List<Character>>((ref) {
+  return RosterNotifier();
+});
+
+class RosterNotifier extends StateNotifier<List<Character>> {
+  RosterNotifier() : super([]);
+  RosterNotifier.fromList(super.saved);
+
+  void addHero(Character hero) => state = [...state, hero];
+
+  void removeHero(String heroId) =>
+      state = state.where((h) => h.id != heroId).toList();
+
+  void updateHero(Character hero) {
+    state = [
+      for (final h in state)
+        if (h.id == hero.id) hero else h,
+    ];
+  }
+
+  void reset() => state = [];
+}
+
 /// Collect current state and save to disk.
 Future<void> collectAndSave(WidgetRef ref) async {
   final saveManager = ref.read(saveManagerProvider);
   final data = SaveData(
     party: ref.read(partyProvider),
+    roster: ref.read(rosterProvider),
+    ownedHeroIds: ref.read(ownedHeroIdsProvider),
     inventory: ref.read(inventoryProvider),
     gold: ref.read(goldProvider),
     clearedEncounters: ref.read(clearedEncountersProvider),

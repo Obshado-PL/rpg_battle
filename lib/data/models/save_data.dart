@@ -5,6 +5,8 @@ import 'item.dart';
 class SaveData {
   final int version;
   final List<Character> party;
+  final List<Character> roster;
+  final Set<String> ownedHeroIds;
   final List<InventorySlot> inventory;
   final int gold;
   final Set<String> clearedEncounters;
@@ -15,8 +17,10 @@ class SaveData {
   final String savedAt;
 
   const SaveData({
-    this.version = 3,
+    this.version = 4,
     required this.party,
+    this.roster = const [],
+    this.ownedHeroIds = const {},
     required this.inventory,
     required this.gold,
     required this.clearedEncounters,
@@ -30,6 +34,8 @@ class SaveData {
   Map<String, dynamic> toJson() => {
         'version': version,
         'party': party.map((c) => c.toJson()).toList(),
+        'roster': roster.map((c) => c.toJson()).toList(),
+        'ownedHeroIds': ownedHeroIds.toList(),
         'inventory': inventory
             .map((s) => {'itemId': s.itemId, 'quantity': s.quantity})
             .toList(),
@@ -48,6 +54,14 @@ class SaveData {
       party: (json['party'] as List)
           .map((c) => Character.fromJson(c as Map<String, dynamic>))
           .toList(),
+      roster: (json['roster'] as List?)
+              ?.map((c) => Character.fromJson(c as Map<String, dynamic>))
+              .toList() ??
+          [],
+      ownedHeroIds: (json['ownedHeroIds'] as List?)
+              ?.cast<String>()
+              .toSet() ??
+          {},
       inventory: (json['inventory'] as List)
           .map((s) => InventorySlot(
                 itemId: s['itemId'] as String,

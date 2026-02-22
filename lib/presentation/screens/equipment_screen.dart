@@ -7,6 +7,7 @@ import '../../data/models/equipment.dart';
 import '../../data/models/stats.dart';
 import '../../domain/equipment_system.dart';
 import '../providers/game_providers.dart';
+import '../widgets/common/hero_portrait.dart';
 
 class EquipmentScreen extends ConsumerStatefulWidget {
   const EquipmentScreen({super.key});
@@ -95,8 +96,7 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(_heroClassIcon(h.heroClass),
-                                color: _heroClassColor(h.heroClass), size: 16),
+                            HeroPortrait(spriteId: h.spriteId, size: 24),
                             const SizedBox(height: 4),
                             Text(h.name,
                                 style: Theme.of(context)
@@ -425,12 +425,4 @@ class _EquipmentScreenState extends ConsumerState<EquipmentScreen> {
     };
   }
 
-  IconData _heroClassIcon(HeroClass heroClass) {
-    return switch (heroClass) {
-      HeroClass.warrior => Icons.security,
-      HeroClass.mage => Icons.auto_fix_high,
-      HeroClass.healer => Icons.favorite,
-      HeroClass.rogue => Icons.flash_on,
-    };
-  }
 }

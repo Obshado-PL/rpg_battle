@@ -7,6 +7,7 @@ import '../models/difficulty.dart';
 import '../models/encounter.dart';
 import '../models/enemy.dart';
 import '../models/equipment.dart';
+import '../models/hero_template.dart';
 import '../models/item.dart';
 import '../models/loot_table.dart';
 import '../models/skill.dart';
@@ -15,6 +16,13 @@ import '../models/stats.dart';
 import '../models/story_dialogue.dart';
 
 class GameData {
+  static const starterHeroIds = [
+    'hero_warrior',
+    'hero_mage',
+    'hero_healer',
+    'hero_rogue',
+  ];
+
   late final Map<String, Skill> skills;
   late final Map<String, Enemy> enemyTemplates;
   late final Map<String, Item> items;
@@ -23,6 +31,7 @@ class GameData {
   late final Map<String, List<LootDrop>> lootTables;
   late final List<SkillTree> skillTrees;
   late final Map<String, EncounterStory> storyData;
+  late final Map<String, HeroTemplate> heroTemplates;
   late final List<Character> defaultParty;
 
   Future<void> load() async {
@@ -34,7 +43,38 @@ class GameData {
     lootTables = await _loadLootTables();
     skillTrees = await _loadSkillTrees();
     storyData = await _loadStory();
+    heroTemplates = await _loadHeroTemplates();
     defaultParty = _createDefaultParty();
+  }
+
+  Future<Map<String, HeroTemplate>> _loadHeroTemplates() async {
+    final jsonStr = await rootBundle.loadString('assets/data/heroes.json');
+    final list = json.decode(jsonStr) as List;
+    final map = <String, HeroTemplate>{};
+    for (final entry in list) {
+      final template = HeroTemplate.fromJson(entry as Map<String, dynamic>);
+      map[template.id] = template;
+    }
+    return map;
+  }
+
+  Character createCharacterFromTemplate(String heroId) {
+    final template = heroTemplates[heroId]!;
+    return Character(
+      id: template.id,
+      name: template.name,
+      heroClass: template.heroClass,
+      spriteId: template.spriteId,
+      level: 1,
+      currentHp: template.baseStats.maxHp,
+      currentMp: template.baseStats.maxMp,
+      baseStats: template.baseStats,
+      xp: 0,
+      skillIds: template.startingSkillIds,
+      weaponId: template.startingWeaponId,
+      armorId: template.startingArmorId,
+      accessoryId: template.startingAccessoryId,
+    );
   }
 
   Future<Map<String, Skill>> _loadSkills() async {
@@ -187,93 +227,6 @@ class GameData {
   }
 
   List<Character> _createDefaultParty() {
-    return [
-      Character(
-        id: 'hero_warrior',
-        name: 'Roland',
-        heroClass: HeroClass.warrior,
-        level: 1,
-        currentHp: 120,
-        currentMp: 30,
-        baseStats: const Stats(
-          maxHp: 120,
-          maxMp: 30,
-          attack: 18,
-          defense: 14,
-          magicAttack: 6,
-          magicDefense: 8,
-          speed: 10,
-        ),
-        xp: 0,
-        skillIds: ['warrior_slash', 'warrior_power_strike'],
-        weaponId: 'wooden_sword',
-        armorId: 'leather_vest',
-      ),
-      Character(
-        id: 'hero_mage',
-        name: 'Lyra',
-        heroClass: HeroClass.mage,
-        level: 1,
-        currentHp: 70,
-        currentMp: 80,
-        baseStats: const Stats(
-          maxHp: 70,
-          maxMp: 80,
-          attack: 6,
-          defense: 7,
-          magicAttack: 20,
-          magicDefense: 15,
-          speed: 12,
-        ),
-        xp: 0,
-        skillIds: ['mage_fireball', 'mage_ice_storm'],
-        weaponId: 'apprentice_staff',
-        armorId: 'mage_robe',
-      ),
-      Character(
-        id: 'hero_healer',
-        name: 'Sera',
-        heroClass: HeroClass.healer,
-        level: 1,
-        currentHp: 90,
-        currentMp: 60,
-        baseStats: const Stats(
-          maxHp: 90,
-          maxMp: 60,
-          attack: 7,
-          defense: 10,
-          magicAttack: 14,
-          magicDefense: 16,
-          speed: 11,
-        ),
-        xp: 0,
-        skillIds: ['healer_heal', 'healer_revive'],
-        weaponId: 'apprentice_staff',
-        armorId: 'leather_vest',
-        accessoryId: 'prayer_beads',
-      ),
-      Character(
-        id: 'hero_rogue',
-        name: 'Kael',
-        heroClass: HeroClass.rogue,
-        level: 1,
-        currentHp: 85,
-        currentMp: 40,
-        baseStats: const Stats(
-          maxHp: 85,
-          maxMp: 40,
-          attack: 15,
-          defense: 9,
-          magicAttack: 8,
-          magicDefense: 10,
-          speed: 20,
-        ),
-        xp: 0,
-        skillIds: ['rogue_backstab', 'rogue_poison_dart'],
-        weaponId: 'wooden_sword',
-        armorId: 'shadow_cloak',
-        accessoryId: 'rusty_dagger',
-      ),
-    ];
+    return starterHeroIds.map(createCharacterFromTemplate).toList();
   }
 }

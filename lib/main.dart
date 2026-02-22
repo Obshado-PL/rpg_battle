@@ -37,6 +37,16 @@ void main() async {
             (ref) => PartyNotifier(savedData.party,
                 equipmentData: gameData.equipment),
           ),
+          rosterProvider.overrideWith(
+            (ref) => RosterNotifier.fromList(savedData.roster),
+          ),
+          ownedHeroIdsProvider.overrideWith(
+            (ref) => OwnedHeroIdsNotifier.fromSet(
+              savedData.ownedHeroIds.isNotEmpty
+                  ? savedData.ownedHeroIds
+                  : savedData.party.map((c) => c.id).toSet(),
+            ),
+          ),
           inventoryProvider.overrideWith(
             (ref) => InventoryNotifier.fromList(savedData.inventory),
           ),

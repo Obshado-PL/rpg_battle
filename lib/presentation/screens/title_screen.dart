@@ -7,9 +7,12 @@ import '../../data/models/encounter.dart';
 import '../../data/models/item.dart';
 import '../../domain/sound_manager.dart';
 import '../providers/game_providers.dart';
+import '../widgets/common/hero_portrait.dart';
 import 'battle_screen.dart';
 import 'bestiary_screen.dart';
 import 'equipment_screen.dart';
+import 'gacha_screen.dart';
+import 'party_screen.dart';
 import 'shop_screen.dart';
 import 'skill_tree_screen.dart';
 import '../widgets/common/dialogue_overlay.dart';
@@ -258,27 +261,69 @@ class TitleScreen extends ConsumerWidget {
                     ),
                     Expanded(
                       child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const GachaScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.auto_awesome, size: 14),
+                          label: const Text('Summon', style: TextStyle(fontSize: 11)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple[700],
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
                         padding: const EdgeInsets.only(left: 3),
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            ref.read(partyProvider.notifier).healAll();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Party fully healed!'),
-                                duration: Duration(seconds: 1),
-                              ),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const PartyScreen()),
                             );
                           },
-                          icon: const Icon(Icons.favorite, size: 14),
-                          label: const Text('Heal', style: TextStyle(fontSize: 11)),
+                          icon: const Icon(Icons.groups, size: 14),
+                          label: const Text('Party', style: TextStyle(fontSize: 11)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green[700],
+                            backgroundColor: Colors.indigo[700],
                             padding: const EdgeInsets.symmetric(vertical: 8),
                           ),
                         ),
                       ),
                     ),
                   ],
+                ),
+              ),
+              // Action buttons - Row 3
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      ref.read(partyProvider.notifier).healAll();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Party fully healed!'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.favorite, size: 14),
+                    label: const Text('Heal Party', style: TextStyle(fontSize: 11)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green[700],
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                    ),
+                  ),
                 ),
               ),
 
@@ -342,6 +387,8 @@ class TitleScreen extends ConsumerWidget {
     final gameData = ref.read(gameDataProvider);
     // Reset all providers to defaults
     ref.read(partyProvider.notifier).updateParty(gameData.defaultParty);
+    ref.read(rosterProvider.notifier).reset();
+    ref.read(ownedHeroIdsProvider.notifier).reset();
     ref.read(inventoryProvider.notifier).updateInventory([
       const InventorySlot(itemId: 'potion', quantity: 5),
       const InventorySlot(itemId: 'hi_potion', quantity: 2),
@@ -363,34 +410,15 @@ class TitleScreen extends ConsumerWidget {
   Widget _buildPartyPreview(BuildContext context, List<Character> party) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 12,
+        runSpacing: 8,
         children: party.map((hero) {
-          Color classColor;
-          IconData classIcon;
-          switch (hero.heroClass) {
-            case HeroClass.warrior:
-              classColor = Colors.orange;
-              classIcon = Icons.security;
-            case HeroClass.mage:
-              classColor = Colors.purple;
-              classIcon = Icons.auto_fix_high;
-            case HeroClass.healer:
-              classColor = Colors.green;
-              classIcon = Icons.favorite;
-            case HeroClass.rogue:
-              classColor = Colors.amber;
-              classIcon = Icons.flash_on;
-          }
-
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: classColor.withValues(alpha: 0.3),
-                child: Icon(classIcon, color: classColor, size: 20),
-              ),
+              HeroPortrait(spriteId: hero.spriteId, size: 36),
               const SizedBox(height: 4),
               Text(
                 hero.name,

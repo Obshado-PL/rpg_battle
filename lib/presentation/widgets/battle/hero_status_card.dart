@@ -4,6 +4,7 @@ import '../../../data/models/character.dart';
 import '../../../data/models/stats.dart';
 import '../../../data/models/status_effect.dart';
 import '../../animation/battle_animation_controller.dart';
+import '../common/hero_portrait.dart';
 import '../common/hp_bar.dart';
 import '../common/mp_bar.dart';
 
@@ -281,27 +282,7 @@ class _HeroStatusCardState extends State<HeroStatusCard>
   }
 
   Widget _classIcon() {
-    IconData iconData;
-    Color iconColor;
-    switch (widget.hero.heroClass) {
-      case HeroClass.warrior:
-        iconData = Icons.security;
-        iconColor = Colors.orange;
-        break;
-      case HeroClass.mage:
-        iconData = Icons.auto_fix_high;
-        iconColor = Colors.purple;
-        break;
-      case HeroClass.healer:
-        iconData = Icons.favorite;
-        iconColor = Colors.green;
-        break;
-      case HeroClass.rogue:
-        iconData = Icons.flash_on;
-        iconColor = Colors.amber;
-        break;
-    }
-    return Icon(iconData, size: 12, color: iconColor);
+    return HeroPortrait(spriteId: widget.hero.spriteId, size: 24);
   }
 
   static (IconData, Color) _statusIcon(StatusEffectType type) {

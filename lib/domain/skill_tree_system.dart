@@ -22,7 +22,7 @@ class SkillTreeSystem {
     if (tierNodes.isEmpty) return false;
 
     // Already chosen this tier?
-    final key = '${hero.heroClass.name}_tier$tier';
+    final key = '${hero.id}_tier$tier';
     if (choices.containsKey(key)) return false;
 
     // Must meet level requirement
@@ -30,7 +30,7 @@ class SkillTreeSystem {
 
     // Must have chosen all previous tiers
     for (var t = 1; t < tier; t++) {
-      final prevKey = '${hero.heroClass.name}_tier$t';
+      final prevKey = '${hero.id}_tier$t';
       if (!choices.containsKey(prevKey)) return false;
     }
 
@@ -55,7 +55,7 @@ class SkillTreeSystem {
     if (tree == null) return hero;
 
     // Remove any previously chosen skill for this tier (in case of reset)
-    final key = '${hero.heroClass.name}_tier$tier';
+    final key = '${hero.id}_tier$tier';
     final oldSkillId = choices[key];
     var newSkills = List<String>.from(hero.skillIds);
     if (oldSkillId != null) {
@@ -90,13 +90,13 @@ class SkillTreeSystem {
   }
 
   /// Get all skills that should be on a hero based on current choices.
-  List<String> getChosenSkillIds(HeroClass heroClass, Map<String, String> choices) {
+  List<String> getChosenSkillIds(String heroId, HeroClass heroClass, Map<String, String> choices) {
     final result = <String>[];
     final tree = getTree(heroClass);
     if (tree == null) return result;
 
     for (var tier = 1; tier <= tree.maxTier; tier++) {
-      final key = '${heroClass.name}_tier$tier';
+      final key = '${heroId}_tier$tier';
       final chosenId = choices[key];
       if (chosenId != null) result.add(chosenId);
     }

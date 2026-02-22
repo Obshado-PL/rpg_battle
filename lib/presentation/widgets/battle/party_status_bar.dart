@@ -33,11 +33,11 @@ class PartyStatusBar extends StatelessWidget {
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: party.length > 4 ? 3 : 2,
           mainAxisSpacing: 6,
           crossAxisSpacing: 6,
-          childAspectRatio: 2.2,
+          childAspectRatio: party.length > 4 ? 1.8 : 2.2,
         ),
         itemCount: party.length,
         itemBuilder: (context, index) {

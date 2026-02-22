@@ -7,6 +7,7 @@ class Character {
   final String id;
   final String name;
   final HeroClass heroClass;
+  final int spriteId;
   final int level;
   final int currentHp;
   final int currentMp;
@@ -23,6 +24,7 @@ class Character {
     required this.id,
     required this.name,
     required this.heroClass,
+    this.spriteId = 0,
     required this.level,
     required this.currentHp,
     required this.currentMp,
@@ -46,6 +48,7 @@ class Character {
     String? id,
     String? name,
     HeroClass? heroClass,
+    int? spriteId,
     int? level,
     int? currentHp,
     int? currentMp,
@@ -62,6 +65,7 @@ class Character {
       id: id ?? this.id,
       name: name ?? this.name,
       heroClass: heroClass ?? this.heroClass,
+      spriteId: spriteId ?? this.spriteId,
       level: level ?? this.level,
       currentHp: currentHp ?? this.currentHp,
       currentMp: currentMp ?? this.currentMp,
@@ -84,6 +88,7 @@ class Character {
       heroClass: HeroClass.values.firstWhere(
         (e) => e.name == json['heroClass'],
       ),
+      spriteId: json['spriteId'] as int? ?? 0,
       level: json['level'] as int? ?? 1,
       currentHp: json['currentHp'] as int? ?? stats.maxHp,
       currentMp: json['currentMp'] as int? ?? stats.maxMp,
@@ -100,6 +105,7 @@ class Character {
         'id': id,
         'name': name,
         'heroClass': heroClass.name,
+        'spriteId': spriteId,
         'level': level,
         'currentHp': currentHp,
         'currentMp': currentMp,

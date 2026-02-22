@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../data/datasources/game_data.dart';
 import '../../../data/models/character.dart';
 import '../../../domain/loot_system.dart';
+import '../common/hero_portrait.dart';
 
 class BattleResultsDialog extends StatefulWidget {
   final int xpGained;
@@ -204,6 +205,8 @@ class _BattleResultsDialogState extends State<BattleResultsDialog>
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
+          HeroPortrait(spriteId: hero.spriteId, size: 20),
+          const SizedBox(width: 6),
           // Name
           Expanded(
             child: Text(
